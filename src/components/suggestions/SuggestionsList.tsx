@@ -58,33 +58,32 @@ export function SuggestionsList({
                 </span>
               </div>
               {s.note && (
-                <p className="mt-1 font-body text-xs text-ink-faded">
+                <p className="mt-1 font-body text-sm italic text-ink-faded">
                   {s.note}
                 </p>
               )}
-              <div className="mt-1 flex items-center justify-between gap-2">
-                {s.suggestedBy ? (
-                  <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
-                    &mdash; {s.suggestedBy}
+              {s.suggestedBy && (
+                <p className="mt-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
+                  &mdash; {s.suggestedBy}
+                </p>
+              )}
+
+              <div className="mt-3 flex items-center justify-between gap-2 border-t border-dashed border-[var(--ink-faded)]/30 pt-2">
+                {isMysterySuggestion(s) ? (
+                  <p className="font-mono-data text-[0.55rem] uppercase tracking-[0.14em] text-ink-faded">
+                    Randomly assigned — interest locked
                   </p>
                 ) : (
-                  <span />
+                  <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
                 )}
                 <button
                   type="button"
                   onClick={() => onPromoteSuggestion(s)}
-                  className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-oxblood hover:opacity-70"
+                  className="shrink-0 rounded-sm border border-[var(--brass)]/60 px-2 py-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-oxblood hover:bg-black/5"
                 >
                   Promote to entry
                 </button>
               </div>
-              {isMysterySuggestion(s) ? (
-                <p className="mt-2 font-mono-data text-[0.55rem] uppercase tracking-[0.14em] text-ink-faded">
-                  Randomly assigned — interest locked
-                </p>
-              ) : (
-                <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
-              )}
             </li>
           ))}
           {suggestions.length === 0 && (

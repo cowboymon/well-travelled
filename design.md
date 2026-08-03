@@ -99,10 +99,11 @@ entries:
   "Suggested"/"Proposed" labels.
 - On the map, suggested-but-unvisited countries get a small dashed-outline
   marker at the centroid (a `?` glyph) by default. If the suggestion was
-  mystery-drawn AND has an assigned person, it instead gets a small dart
-  marker (oxblood, shaft + tip + feathered tail) with that person's name
-  above it — visually distinct from both the plain `?` marker and the
-  solid double-ring host stamps.
+  mystery-drawn AND has an assigned person, it instead gets a solid oxblood
+  push-pin marker (round head with a paper-coloured hole, point at the
+  centroid) — no name label on the map itself (the assigned person's name
+  lives in the suggestion card, not as map clutter) — visually distinct
+  from both the plain `?` marker and the solid double-ring host stamps.
 - The suggestion form/list still follow the shared modal shell (`rounded-sm`,
   `.shadow-paper`, brass hairline), but the CTA is a brass hairline outline
   button (secondary voice), never solid oxblood — suggesting isn't the

@@ -330,38 +330,13 @@ export function WorldMap({
                   >
                     {/* invisible larger hit target, min ~44px screen px worth of svg units */}
                     <circle r={16} fill="transparent" />
-                    {/* dart silhouette: tip lands at the centroid, barrel +
-                        segment rings + flared flight angle back and up,
-                        like a thrown dart stuck in the map */}
-                    <g transform="rotate(-32)" fill="var(--oxblood)">
-                      <polygon points="0,0 -1.1,-2.6 1.1,-2.6" />
-                      <rect x={-0.9} y={-8.2} width={1.8} height={5.8} rx={0.9} />
-                      <rect
-                        x={-0.9}
-                        y={-6.4}
-                        width={1.8}
-                        height={0.6}
-                        fill="var(--paper)"
-                      />
-                      <rect
-                        x={-0.9}
-                        y={-4.6}
-                        width={1.8}
-                        height={0.6}
-                        fill="var(--paper)"
-                      />
-                      <polygon points="-0.9,-8.2 -4.4,-13 -0.9,-10.2" />
-                      <polygon points="0.9,-8.2 4.4,-13 0.9,-10.2" />
+                    {/* push pin: tip lands at the centroid, round head above
+                        with a paper-coloured hole, like a pin stuck in a map */}
+                    <g fill="var(--oxblood)">
+                      <polygon points="-1.7,-4.6 1.7,-4.6 0,0" />
+                      <circle cx={0} cy={-7} r={3.2} />
+                      <circle cx={0} cy={-7} r={1.15} fill="var(--paper)" />
                     </g>
-                    <text
-                      textAnchor="middle"
-                      y={-16}
-                      fontSize={6}
-                      fill="var(--oxblood)"
-                      className="font-mono-data uppercase tracking-wide select-none"
-                    >
-                      {suggestion.suggestedBy}
-                    </text>
                   </g>
                 );
               }

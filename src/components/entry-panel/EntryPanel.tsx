@@ -110,26 +110,29 @@ export function EntryPanel({
                 className="rounded-sm border border-dashed border-[var(--ink-faded)]/50 p-3"
               >
                 {s.note && (
-                  <p className="font-body text-xs text-ink-faded">{s.note}</p>
-                )}
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
-                    {s.suggestedBy ? `— ${s.suggestedBy}` : "— Someone"}
+                  <p className="font-body text-sm italic text-ink-faded">
+                    {s.note}
                   </p>
+                )}
+                <p className="mt-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
+                  {s.suggestedBy ? `— ${s.suggestedBy}` : "— Someone"}
+                </p>
+
+                <div className="mt-3 flex items-center justify-between gap-2 border-t border-dashed border-[var(--ink-faded)]/30 pt-2">
+                  {isMysterySuggestion(s) ? (
+                    <p className="font-mono-data text-[0.55rem] uppercase tracking-[0.14em] text-ink-faded">
+                      Randomly assigned — interest locked
+                    </p>
+                  ) : (
+                    <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
+                  )}
                   <button
                     onClick={() => onPromoteSuggestion(s)}
-                    className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-oxblood hover:opacity-70"
+                    className="shrink-0 rounded-sm border border-[var(--brass)]/60 px-2 py-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-oxblood hover:bg-black/5"
                   >
                     Promote to entry
                   </button>
                 </div>
-                {isMysterySuggestion(s) ? (
-                  <p className="mt-2 font-mono-data text-[0.55rem] uppercase tracking-[0.14em] text-ink-faded">
-                    Randomly assigned — interest locked
-                  </p>
-                ) : (
-                  <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
-                )}
               </div>
             ))}
           </div>
