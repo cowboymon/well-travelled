@@ -43,8 +43,8 @@ export function EntryPanel({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-black/20 animate-fade-lift md:bg-transparent">
-      <div className="h-full w-full overflow-y-auto border-l border-brass/30 bg-paper p-6 shadow-paper md:w-[420px] md:p-8">
+    <div className="pointer-events-none fixed inset-0 z-40 flex justify-end bg-black/20 animate-fade-lift md:bg-transparent">
+      <div className="pointer-events-auto h-full w-full overflow-y-auto border-l border-brass/30 bg-paper p-6 shadow-paper md:w-[420px] md:p-8">
         <div className="mb-4 flex items-start justify-between">
           <div>
             <p className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded">
