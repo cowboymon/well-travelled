@@ -143,6 +143,11 @@ export function AppShell({
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden md:flex-row">
       <div className="relative flex-1 bg-ocean/40">
+        <div className="pointer-events-none absolute left-6 top-6 z-10 hidden md:block">
+          <p className="font-display text-lg uppercase tracking-[0.2em] text-ink">
+            On Margaret Street
+          </p>
+        </div>
         <WorldMap
           entries={entries}
           hostById={hostById}
