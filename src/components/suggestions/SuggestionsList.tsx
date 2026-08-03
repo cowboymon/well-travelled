@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { countryName } from "@/lib/countries";
+import { InterestToggle } from "@/components/suggestions/InterestToggle";
 import type { SuggestionRecord } from "@/lib/types";
 
 export function SuggestionsList({
@@ -12,6 +14,15 @@ export function SuggestionsList({
   onClose: () => void;
   onPromoteSuggestion: (suggestion: SuggestionRecord) => void;
 }) {
+  // Optimistic overrides for interest toggles, keyed by suggestion id, so a
+  // toggle updates instantly without waiting on a parent-level refetch.
+  const [overrides, setOverrides] = useState<Record<string, SuggestionRecord>>(
+    {}
+  );
+  const displayed = suggestions.map((s) => overrides[s.id] ?? s);
+  function onInterestUpdated(updated: SuggestionRecord) {
+    setOverrides((prev) => ({ ...prev, [updated.id]: updated }));
+  }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="flex max-h-[80vh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-sm border border-brass/40 bg-paper p-6 shadow-paper animate-fade-lift">
@@ -32,7 +43,7 @@ export function SuggestionsList({
         </div>
 
         <ul className="flex flex-col gap-3">
-          {suggestions.map((s) => (
+          {displayed.map((s) => (
             <li
               key={s.id}
               className="rounded-sm border border-dashed border-[var(--ink-faded)]/50 p-3"
@@ -66,6 +77,7 @@ export function SuggestionsList({
                   Promote to entry
                 </button>
               </div>
+              <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
             </li>
           ))}
           {suggestions.length === 0 && (

@@ -9,7 +9,7 @@ import { EntryForm } from "@/components/entry-form/EntryForm";
 import { HostManager } from "@/components/host-manager/HostManager";
 import { SuggestionForm } from "@/components/suggestions/SuggestionForm";
 import { SuggestionsList } from "@/components/suggestions/SuggestionsList";
-import { COUNTRY_BY_ALPHA3 } from "@/lib/countries";
+import { COUNTRY_BY_ALPHA3, countryName } from "@/lib/countries";
 import type { EntryRecord, HostRecord, SuggestionRecord } from "@/lib/types";
 
 export function AppShell({
@@ -32,6 +32,11 @@ export function AppShell({
     defaultCountryCode: string | null;
   } | null>(null);
   const [showSuggestionsList, setShowSuggestionsList] = useState(false);
+  const [drawing, setDrawing] = useState(false);
+  const [mysteryResult, setMysteryResult] = useState<{
+    person: string;
+    countryCode: string;
+  } | null>(null);
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [highlightedHostId, setHighlightedHostId] = useState<string | null>(
@@ -88,6 +93,20 @@ export function AppShell({
     if (res.ok) setSuggestions(await res.json());
   }
 
+  async function drawMystery() {
+    if (drawing) return;
+    setDrawing(true);
+    try {
+      const res = await fetch("/api/suggestions/mystery", { method: "POST" });
+      if (!res.ok) return;
+      const result = await res.json();
+      setMysteryResult({ person: result.person, countryCode: result.countryCode });
+      await refreshSuggestions();
+    } finally {
+      setDrawing(false);
+    }
+  }
+
   const entriesForSelected = selectedCountry
     ? entries.filter((e) => e.countryCode === selectedCountry)
     : [];
@@ -141,6 +160,13 @@ export function AppShell({
             className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5"
           >
             Suggest a country
+          </button>
+          <button
+            onClick={drawMystery}
+            disabled={drawing}
+            className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5 disabled:opacity-50"
+          >
+            {drawing ? "Drawing..." : "🎲 Draw a mystery country"}
           </button>
           {suggestions.length > 0 && (
             <button
@@ -249,6 +275,33 @@ export function AppShell({
             promoteSuggestion(suggestion);
           }}
         />
+      )}
+
+      {mysteryResult && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+          onClick={() => setMysteryResult(null)}
+        >
+          <div
+            className="animate-stamp-in rounded-sm border-2 border-oxblood bg-paper px-8 py-6 text-center shadow-paper"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.2em] text-[var(--brass)]">
+              Mystery draw
+            </p>
+            <p className="mt-2 font-display text-xl text-ink">
+              {mysteryResult.person} has been mysteriously assigned{" "}
+              {countryName(mysteryResult.countryCode)}!
+            </p>
+            <button
+              type="button"
+              onClick={() => setMysteryResult(null)}
+              className="mt-4 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
       )}
 
       {showAdminLogin && (

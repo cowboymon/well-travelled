@@ -61,6 +61,7 @@ export const suggestions = pgTable("suggestions", {
   countryCode: text("country_code").notNull(),
   suggestedBy: text("suggested_by"),
   note: text("note"),
+  interested: text("interested").array().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

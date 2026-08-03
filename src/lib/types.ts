@@ -32,6 +32,7 @@ export interface SuggestionRecord {
   countryCode: string;
   suggestedBy: string | null;
   note: string | null;
+  interested: string[];
   createdAt: string;
 }
 

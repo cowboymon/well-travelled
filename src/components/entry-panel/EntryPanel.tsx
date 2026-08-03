@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Stamp } from "@/components/ui/Stamp";
+import { InterestToggle } from "@/components/suggestions/InterestToggle";
 import { countryName, COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
 import type {
@@ -38,6 +39,15 @@ export function EntryPanel({
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(
     null
   );
+  const [interestOverrides, setInterestOverrides] = useState<
+    Record<string, SuggestionRecord>
+  >({});
+  const displayedSuggestions = suggestions.map(
+    (s) => interestOverrides[s.id] ?? s
+  );
+  function onInterestUpdated(updated: SuggestionRecord) {
+    setInterestOverrides((prev) => ({ ...prev, [updated.id]: updated }));
+  }
   const ref = COUNTRY_BY_ALPHA3.get(countryCode);
   const sorted = [...entries].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -93,7 +103,7 @@ export function EntryPanel({
             <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.2em] text-ink-faded">
               Proposed, not yet cooked
             </p>
-            {suggestions.map((s) => (
+            {displayedSuggestions.map((s) => (
               <div
                 key={s.id}
                 className="rounded-sm border border-dashed border-[var(--ink-faded)]/50 p-3"
@@ -112,6 +122,7 @@ export function EntryPanel({
                     Promote to entry
                   </button>
                 </div>
+                <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
               </div>
             ))}
           </div>

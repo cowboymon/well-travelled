@@ -105,6 +105,18 @@ entries:
   button (secondary voice), never solid oxblood — suggesting isn't the
   primary admin action.
 
+## Suggestions extensions (permanent rule)
+- Mystery-drawn suggestions (the "Draw a mystery country" button) are plain
+  suggestion rows — no extra DB column — distinguished only by their note
+  text always starting with `🎲 Mystery assignment —`, so they read
+  differently from a human-written note without adding schema.
+- Expressing interest in a suggestion ("I'm interested in hosting this") is
+  viewer-level like the rest of the suggestions system — no admin gate.
+  Interest is a `text[]` column on `suggestions` (same pattern as
+  `entries.attendees`), rendered as a muted mono `Interested: ...` line —
+  never a host-colour stamp, consistent with the suggestions-vs-entries
+  rule above.
+
 ## Exports
 
 ### tokens.css
