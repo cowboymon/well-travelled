@@ -2,7 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { NewSuggestion, NewComment } from "@/db/schema";
 import { getDb, schema } from "@/db";
 import { COUNTRIES } from "@/lib/countries";
-import { MYSTERY_NOTE_PREFIX } from "@/lib/suggestions";
+import { MYSTERY_NOTE_PREFIX, isMysterySuggestion } from "@/lib/suggestions";
 
 export interface PersonRecord {
   id: string;
@@ -152,6 +152,11 @@ export async function toggleSuggestionInterest(
     .limit(1);
   if (!existing) {
     throw new Error("Suggestion not found.");
+  }
+  if (isMysterySuggestion(existing)) {
+    throw new Error(
+      "This suggestion was randomly assigned — interest is locked to the assigned person."
+    );
   }
   const current = existing.interested ?? [];
   const alreadyIn = current.some(

@@ -5,6 +5,7 @@ import { Stamp } from "@/components/ui/Stamp";
 import { InterestToggle } from "@/components/suggestions/InterestToggle";
 import { countryName, COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
+import { isMysterySuggestion } from "@/lib/suggestions";
 import type {
   CommentRecord,
   EntryRecord,
@@ -122,7 +123,13 @@ export function EntryPanel({
                     Promote to entry
                   </button>
                 </div>
-                <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
+                {isMysterySuggestion(s) ? (
+                  <p className="mt-2 font-mono-data text-[0.55rem] uppercase tracking-[0.14em] text-ink-faded">
+                    Randomly assigned — interest locked
+                  </p>
+                ) : (
+                  <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
+                )}
               </div>
             ))}
           </div>

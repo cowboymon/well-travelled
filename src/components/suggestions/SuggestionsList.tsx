@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { countryName } from "@/lib/countries";
 import { InterestToggle } from "@/components/suggestions/InterestToggle";
+import { isMysterySuggestion } from "@/lib/suggestions";
 import type { SuggestionRecord } from "@/lib/types";
 
 export function SuggestionsList({
@@ -77,7 +78,13 @@ export function SuggestionsList({
                   Promote to entry
                 </button>
               </div>
-              <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
+              {isMysterySuggestion(s) ? (
+                <p className="mt-2 font-mono-data text-[0.55rem] uppercase tracking-[0.14em] text-ink-faded">
+                  Randomly assigned — interest locked
+                </p>
+              ) : (
+                <InterestToggle suggestion={s} onUpdated={onInterestUpdated} />
+              )}
             </li>
           ))}
           {suggestions.length === 0 && (

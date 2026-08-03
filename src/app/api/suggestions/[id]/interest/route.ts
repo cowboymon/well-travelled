@@ -20,6 +20,12 @@ export async function POST(
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.message }, { status: 400 });
   }
-  const row = await toggleSuggestionInterest(id, parsed.data.name);
-  return NextResponse.json(row);
+  try {
+    const row = await toggleSuggestionInterest(id, parsed.data.name);
+    return NextResponse.json(row);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not update.";
+    const status = message.includes("not found") ? 404 : 403;
+    return NextResponse.json({ error: message }, { status });
+  }
 }
