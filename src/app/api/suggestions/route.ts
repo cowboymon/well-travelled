@@ -11,7 +11,6 @@ const suggestionSchema = z.object({
     .length(3)
     .refine((c) => COUNTRY_BY_ALPHA3.has(c.toUpperCase()), "Unknown country code.")
     .transform((c) => c.toUpperCase()),
-  dish: z.string().trim().min(1).max(200),
   suggestedBy: z.string().trim().max(80).nullable().optional(),
   note: z.string().trim().max(1000).nullable().optional(),
 });
@@ -42,7 +41,6 @@ export async function POST(req: NextRequest) {
     .insert(schema.suggestions)
     .values({
       countryCode: parsed.data.countryCode,
-      dish: parsed.data.dish,
       suggestedBy: parsed.data.suggestedBy || null,
       note: parsed.data.note || null,
     })

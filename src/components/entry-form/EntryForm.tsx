@@ -101,11 +101,16 @@ export function EntryForm({
     setSaving(true);
     try {
       const uploaded: string[] = [];
+      const failedUploads: string[] = [];
       for (const file of files) {
         const fd = new FormData();
         fd.append("file", file);
         const res = await fetch("/api/photos", { method: "POST", body: fd });
-        if (!res.ok) throw new Error("Photo upload failed.");
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          failedUploads.push(body.error ?? `${file.name} failed to upload.`);
+          continue;
+        }
         const body = await res.json();
         uploaded.push(body.url);
       }
@@ -138,6 +143,10 @@ export function EntryForm({
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Could not save entry.");
+      }
+
+      if (failedUploads.length) {
+        alert(failedUploads.join(" "));
       }
 
       onSaved();

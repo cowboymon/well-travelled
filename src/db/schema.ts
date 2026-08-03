@@ -48,9 +48,20 @@ export const entryPhotos = pgTable("entry_photos", {
 export const suggestions = pgTable("suggestions", {
   id: uuid("id").defaultRandom().primaryKey(),
   countryCode: text("country_code").notNull(),
-  dish: text("dish").notNull(),
   suggestedBy: text("suggested_by"),
   note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const comments = pgTable("comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  entryId: uuid("entry_id")
+    .notNull()
+    .references(() => entries.id, { onDelete: "cascade" }),
+  authorName: text("author_name").notNull(),
+  body: text("body").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -64,3 +75,5 @@ export type EntryPhoto = typeof entryPhotos.$inferSelect;
 export type NewEntryPhoto = typeof entryPhotos.$inferInsert;
 export type Suggestion = typeof suggestions.$inferSelect;
 export type NewSuggestion = typeof suggestions.$inferInsert;
+export type Comment = typeof comments.$inferSelect;
+export type NewComment = typeof comments.$inferInsert;

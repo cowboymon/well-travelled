@@ -18,7 +18,7 @@ export function SuggestionsList({
             <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.2em] text-ink-faded">
               Proposed, not yet cooked
             </p>
-            <h2 className="font-display text-2xl text-ink">Meal suggestions</h2>
+            <h2 className="font-display text-2xl text-ink">Country suggestions</h2>
           </div>
           <button
             type="button"
@@ -43,9 +43,6 @@ export function SuggestionsList({
                   Suggested
                 </span>
               </div>
-              <p className="font-body text-sm italic text-ink-faded">
-                {s.dish}
-              </p>
               {s.note && (
                 <p className="mt-1 font-body text-xs text-ink-faded">
                   {s.note}

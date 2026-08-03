@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Stamp } from "@/components/ui/Stamp";
 import { countryName, COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
-import type { EntryRecord } from "@/lib/types";
+import { ATTENDEES } from "@/lib/attendees";
+import type { CommentRecord, EntryRecord } from "@/lib/types";
 
 export function EntryPanel({
   countryCode,
@@ -163,10 +164,233 @@ export function EntryPanel({
                   </button>
                 </div>
               )}
+
+              <CommentsSection entryId={entry.id} />
             </article>
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function CommentsSection({ entryId }: { entryId: string }) {
+  const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [comments, setComments] = useState<CommentRecord[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [attendee, setAttendee] = useState<string>(ATTENDEES[0]);
+  const [useOther, setUseOther] = useState(false);
+  const [otherName, setOtherName] = useState("");
+  const [body, setBody] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadComments() {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/entries/${entryId}/comments`);
+      if (res.ok) setComments(await res.json());
+      setLoaded(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function toggleOpen() {
+    setOpen((prev) => {
+      const next = !prev;
+      if (next && !loaded) loadComments();
+      return next;
+    });
+  }
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const authorName = (useOther ? otherName : attendee).trim();
+    if (!authorName) {
+      setError("Who's leaving this comment?");
+      return;
+    }
+    if (!body.trim()) {
+      setError("Say something first.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/entries/${entryId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ authorName, body: body.trim() }),
+      });
+      if (!res.ok) {
+        const resBody = await res.json().catch(() => ({}));
+        throw new Error(resBody.error ?? "Could not post comment.");
+      }
+      const comment: CommentRecord = await res.json();
+      setComments((prev) => [...prev, comment]);
+      setBody("");
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-5 border-t border-brass/30 pt-4">
+      <button
+        type="button"
+        onClick={toggleOpen}
+        className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
+      >
+        Remarks {loaded && comments.length > 0 ? `(${comments.length})` : ""}{" "}
+        {open ? "−" : "+"}
+      </button>
+
+      {open && (
+        <div className="mt-3 flex flex-col gap-3">
+          {loading && (
+            <p className="font-mono-data text-xs text-ink-faded">Loading...</p>
+          )}
+
+          {!loading && loaded && comments.length === 0 && !showForm && (
+            <p className="font-mono-data text-xs text-ink-faded">
+              No remarks yet.
+            </p>
+          )}
+
+          {comments.map((c, idx) => (
+            <div
+              key={c.id}
+              className={`pt-3 ${idx > 0 ? "border-t border-brass/20" : ""}`}
+            >
+              <div className="mb-1 flex items-baseline justify-between gap-2">
+                <span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-ink-faded">
+                  {c.authorName}
+                </span>
+                <span className="font-mono-data text-[10px] text-ink-faded">
+                  {new Date(c.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+              </div>
+              <p className="font-body text-sm text-ink">{c.body}</p>
+            </div>
+          ))}
+
+          {!showForm && (
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="self-start rounded-sm border border-brass/50 px-3 py-1.5 font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink hover:bg-black/5"
+            >
+              Leave a comment
+            </button>
+          )}
+
+          {showForm && (
+            <form
+              onSubmit={onSubmit}
+              className="flex flex-col gap-3 rounded-sm border border-brass/30 p-3"
+            >
+              <div>
+                <p className="mb-1.5 font-mono-data text-[10px] uppercase tracking-[0.14em] text-ink-faded">
+                  Who&apos;s this?
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {ATTENDEES.map((name) => (
+                    <button
+                      type="button"
+                      key={name}
+                      onClick={() => {
+                        setAttendee(name);
+                        setUseOther(false);
+                      }}
+                      className={`rounded-sm border px-3 py-1.5 font-mono-data text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                        !useOther && attendee === name
+                          ? "border-oxblood bg-oxblood text-paper"
+                          : "border-brass/50 text-ink hover:bg-black/5"
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setUseOther(true)}
+                    className={`rounded-sm border px-3 py-1.5 font-mono-data text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                      useOther
+                        ? "border-oxblood bg-oxblood text-paper"
+                        : "border-brass/50 text-ink hover:bg-black/5"
+                    }`}
+                  >
+                    Someone else
+                  </button>
+                </div>
+                {useOther && (
+                  <input
+                    value={otherName}
+                    onChange={(e) => setOtherName(e.target.value)}
+                    placeholder="Name"
+                    className="comment-input mt-2"
+                  />
+                )}
+              </div>
+
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value.slice(0, 1000))}
+                rows={3}
+                placeholder="Leave a remark on this entry..."
+                className="comment-input"
+              />
+
+              {error && (
+                <p className="font-mono-data text-xs text-oxblood">{error}</p>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-sm bg-oxblood px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-paper transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {saving ? "Posting..." : "Post"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="rounded-sm border border-brass/50 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink hover:bg-black/5"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      )}
+
+      <style jsx global>{`
+        .comment-input {
+          width: 100%;
+          border: 1px solid rgba(176, 141, 87, 0.5);
+          background: rgba(255, 255, 255, 0.4);
+          border-radius: 2px;
+          padding: 0.6rem 0.8rem;
+          font-size: 0.9rem;
+          color: var(--ink);
+          outline: none;
+        }
+        .comment-input:focus {
+          border-color: var(--oxblood);
+        }
+      `}</style>
     </div>
   );
 }

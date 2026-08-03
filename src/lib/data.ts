@@ -1,5 +1,5 @@
 import { desc, eq, sql } from "drizzle-orm";
-import type { NewSuggestion } from "@/db/schema";
+import type { NewSuggestion, NewComment } from "@/db/schema";
 import { getDb, schema } from "@/db";
 
 export interface HostWithCount {
@@ -85,7 +85,6 @@ export async function listEntries(): Promise<EntryWithRelations[]> {
 export interface SuggestionWithMeta {
   id: string;
   countryCode: string;
-  dish: string;
   suggestedBy: string | null;
   note: string | null;
   createdAt: string;
@@ -105,5 +104,33 @@ export async function createSuggestion(
 ): Promise<SuggestionWithMeta> {
   const db = getDb();
   const [row] = await db.insert(schema.suggestions).values(values).returning();
+  return { ...row, createdAt: row.createdAt as unknown as string };
+}
+
+export interface CommentRecord {
+  id: string;
+  entryId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
+export async function listCommentsForEntry(
+  entryId: string
+): Promise<CommentRecord[]> {
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(schema.comments)
+    .where(eq(schema.comments.entryId, entryId))
+    .orderBy(schema.comments.createdAt);
+  return rows.map((r) => ({ ...r, createdAt: r.createdAt as unknown as string }));
+}
+
+export async function createComment(
+  values: NewComment
+): Promise<CommentRecord> {
+  const db = getDb();
+  const [row] = await db.insert(schema.comments).values(values).returning();
   return { ...row, createdAt: row.createdAt as unknown as string };
 }

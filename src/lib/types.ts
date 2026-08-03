@@ -30,8 +30,15 @@ export interface EntryRecord {
 export interface SuggestionRecord {
   id: string;
   countryCode: string;
-  dish: string;
   suggestedBy: string | null;
   note: string | null;
+  createdAt: string;
+}
+
+export interface CommentRecord {
+  id: string;
+  entryId: string;
+  authorName: string;
+  body: string;
   createdAt: string;
 }

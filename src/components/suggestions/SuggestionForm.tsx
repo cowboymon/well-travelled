@@ -12,7 +12,6 @@ export function SuggestionForm({
 }) {
   const [countryQuery, setCountryQuery] = useState("");
   const [countryCode, setCountryCode] = useState("");
-  const [dish, setDish] = useState("");
   const [suggestedBy, setSuggestedBy] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
@@ -35,10 +34,6 @@ export function SuggestionForm({
       setError("Pick a country.");
       return;
     }
-    if (!dish.trim()) {
-      setError("What's the dish?");
-      return;
-    }
 
     setSaving(true);
     try {
@@ -47,7 +42,6 @@ export function SuggestionForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           countryCode,
-          dish: dish.trim(),
           suggestedBy: suggestedBy.trim() || null,
           note: note.trim() || null,
         }),
@@ -75,7 +69,7 @@ export function SuggestionForm({
             <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.2em] text-ink-faded">
               Pencilled note, not a stamp
             </p>
-            <h2 className="font-display text-2xl text-ink">Suggest a meal</h2>
+            <h2 className="font-display text-2xl text-ink">Suggest a country</h2>
           </div>
           <button
             type="button"
@@ -121,15 +115,6 @@ export function SuggestionForm({
           )}
         </Field>
 
-        <Field label="Dish">
-          <input
-            value={dish}
-            onChange={(e) => setDish(e.target.value)}
-            placeholder="e.g. Bibimbap"
-            className="input"
-          />
-        </Field>
-
         <Field label="Your name (optional)">
           <input
             value={suggestedBy}
@@ -144,6 +129,7 @@ export function SuggestionForm({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
+            placeholder="e.g. someone's aunt makes an amazing tagine"
             className="input"
           />
         </Field>

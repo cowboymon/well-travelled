@@ -80,8 +80,8 @@ panels read as paper laid on paper, not a default web-app card. Photos keep
   first, under-two-minutes-to-complete).
 
 ## Suggestions vs. entries (permanent rule)
-Viewer-submitted meal suggestions ("suggest a meal") are explicitly out of
-the core scope and must never be visually confused with confirmed,
+Viewer-submitted country suggestions ("suggest a country") are explicitly
+out of the core scope and must never be visually confused with confirmed,
 admin-authored entries:
 - Never render a suggestion as an ink stamp (`Stamp.tsx`) or with any host
   pin colour — those are reserved for confirmed hosts/dinners.

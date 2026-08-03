@@ -105,7 +105,7 @@ export function AppShell({
             onClick={() => setShowSuggestionForm(true)}
             className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5"
           >
-            Suggest a meal
+            Suggest a country
           </button>
           {suggestions.length > 0 && (
             <button

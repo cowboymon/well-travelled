@@ -152,21 +152,70 @@ export function WorldMap({
               const alpha3 = ref?.alpha3;
               const visited = alpha3 ? latestByCountry.has(alpha3) : false;
               const isSelected = alpha3 === selectedCountry;
-              const d = path(c as unknown as GeoJSON.Feature);
+              const feat = c as unknown as GeoJSON.Feature;
+              const d = path(feat);
               if (!d) return null;
+
+              // A fixed-width selection stroke re-traces the country's own
+              // path. For a small/thin country geometry (e.g. Vatican,
+              // Singapore, archipelago nations), that stroke width is huge
+              // relative to the shape's own bounding box, and the many
+              // close-together vertices of a tiny polygon plus a thick
+              // stroke's miter joins render as overlapping visual noise —
+              // "melted" edges around the selection. Below a size threshold,
+              // skip stroking the path itself and use a stamp-anchored
+              // highlight ring at the centroid instead (rendered in the
+              // markers layer below), which scales sensibly regardless of
+              // the underlying country geometry's size.
+              const bounds = path.bounds(feat);
+              const boundsWidth = bounds[1][0] - bounds[0][0];
+              const boundsHeight = bounds[1][1] - bounds[0][1];
+              const isTiny = Math.max(boundsWidth, boundsHeight) < 6;
+              const strokeSelected = isSelected && !isTiny;
+
               return (
                 <path
                   key={c.id}
                   d={d}
                   fill={visited ? "#DCD2B8" : "var(--unvisited-land)"}
                   fillOpacity={visited ? 0.9 : 0.55}
-                  stroke={isSelected ? "var(--oxblood)" : "var(--paper)"}
-                  strokeWidth={isSelected ? 1.2 : 0.4}
+                  stroke={strokeSelected ? "var(--oxblood)" : "var(--paper)"}
+                  strokeWidth={strokeSelected ? 1.2 : 0.4}
                   className="cursor-pointer transition-colors duration-150"
                   onClick={() => alpha3 && onSelectCountry(alpha3)}
                 />
               );
             })}
+          </g>
+          <g>
+            {selectedCountry &&
+              (() => {
+                const ref = [...COUNTRY_BY_NUMERIC.values()].find(
+                  (v) => v.alpha3 === selectedCountry
+                );
+                if (!ref) return null;
+                const c = countries.find((cc) => cc.id === ref.numeric);
+                if (!c) return null;
+                const feat = c as unknown as GeoJSON.Feature;
+                const bounds = path.bounds(feat);
+                const boundsWidth = bounds[1][0] - bounds[0][0];
+                const boundsHeight = bounds[1][1] - bounds[0][1];
+                const isTiny = Math.max(boundsWidth, boundsHeight) < 6;
+                if (!isTiny) return null;
+                const centroid = path.centroid(feat);
+                if (!centroid || Number.isNaN(centroid[0])) return null;
+                return (
+                  <circle
+                    cx={centroid[0]}
+                    cy={centroid[1]}
+                    r={9}
+                    fill="none"
+                    stroke="var(--oxblood)"
+                    strokeWidth={1.2}
+                    pointerEvents="none"
+                  />
+                );
+              })()}
           </g>
           <g>
             {[...latestByCountry.entries()].map(([alpha3, entry]) => {

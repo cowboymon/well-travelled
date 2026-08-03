@@ -38,7 +38,7 @@ export function Stamp({
       aria-hidden
     >
       <defs>
-        <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
+        <filter id={filterId} x="-40%" y="-40%" width="180%" height="180%">
           <feTurbulence
             type="fractalNoise"
             baseFrequency="0.9"
