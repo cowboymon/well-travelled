@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { eq, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db";
-import { requireAdmin } from "@/lib/session";
+import { isSiteUnlocked } from "@/lib/session";
 import { HOST_PALETTE } from "@/lib/palette";
 import { findOrCreatePerson } from "@/lib/data";
 
@@ -31,8 +31,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await requireAdmin(req))) {
-    return NextResponse.json({ error: "Admin required." }, { status: 403 });
+  if (!(await isSiteUnlocked())) {
+    return NextResponse.json({ error: "Sign in required." }, { status: 403 });
   }
   const body = await req.json().catch(() => null);
   const parsed = hostSchema.safeParse(body);

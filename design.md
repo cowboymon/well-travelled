@@ -81,12 +81,17 @@ panels read as paper laid on paper, not a default web-app card. Photos keep
 
 ## Access model
 - Site password: gates viewing the whole app.
-- Admin password: gates editing/deleting entries, and all host management
-  (create/edit/delete/colour/initial).
+- Admin password: gates editing/deleting entries, and editing/deleting
+  hosts (colour/initial changes, removal).
 - Creating a new entry (and adding attendees/photos/notes to it) only
   requires the site password — any signed-in viewer can log a dinner, not
   just the admin. Editing or deleting an existing entry still requires
   admin.
+- Creating a new host also only requires the site password — this has to
+  match entry creation's access level, since the entry form's host/co-host
+  pickers let any viewer promote an attendee to a host inline (via an
+  explicit "Save host" step, not a silent background call). Editing an
+  existing host's colour/initial or deleting a host still requires admin.
 
 ## Suggestions vs. entries (permanent rule)
 Viewer-submitted country suggestions ("suggest a country") are explicitly
