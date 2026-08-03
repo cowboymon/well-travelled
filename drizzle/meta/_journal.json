@@ -15,6 +15,13 @@
       "when": 1785736750629,
       "tag": "0001_cute_lorna_dane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785737102701,
+      "tag": "0002_breezy_microbe",
+      "breakpoints": true
     }
   ]
 }

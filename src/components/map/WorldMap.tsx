@@ -95,12 +95,14 @@ export function WorldMap({
     const svg = select(svgRef.current);
     const layer = select(zoomLayerRef.current);
 
+    // No translateExtent: the map should pan freely in all directions
+    // ("like a globe") at any zoom level, including the default 1x. A
+    // translateExtent equal to the content size ([0,0]-[WIDTH,HEIGHT])
+    // was previously clamping translation to zero slack at scale 1,
+    // which made single-finger drag-pan feel dead/broken on mobile.
     const behavior = d3zoom<SVGSVGElement, unknown>()
       .scaleExtent([MIN_SCALE, MAX_SCALE])
-      .translateExtent([
-        [0, 0],
-        [WIDTH, HEIGHT],
-      ])
+      .touchable(() => true)
       .on("zoom", (event) => {
         layer.attr("transform", event.transform.toString());
       });

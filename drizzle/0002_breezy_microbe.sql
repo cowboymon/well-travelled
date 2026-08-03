@@ -1,0 +1,1 @@
+ALTER TABLE "entries" ADD COLUMN "attendees" text[] DEFAULT '{}' NOT NULL;

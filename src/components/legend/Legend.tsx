@@ -1,12 +1,14 @@
 "use client";
 
 import { Stamp } from "@/components/ui/Stamp";
+import { AttendeeLog } from "@/components/legend/AttendeeLog";
 import type { HostRecord } from "@/lib/types";
 
 export function Legend({
   hosts,
   visitedCount,
   continentCount,
+  attendeeCounts,
   highlightedHostId,
   onHoverHost,
   isAdmin,
@@ -18,6 +20,7 @@ export function Legend({
   hosts: HostRecord[];
   visitedCount: number;
   continentCount: number;
+  attendeeCounts: Record<string, number>;
   highlightedHostId: string | null;
   onHoverHost: (id: string | null) => void;
   isAdmin: boolean;
@@ -72,6 +75,8 @@ export function Legend({
           )}
         </ul>
       </div>
+
+      <AttendeeLog counts={attendeeCounts} />
 
       <div className="flex flex-col gap-2 border-t border-brass/30 pt-4">
         {isAdmin ? (

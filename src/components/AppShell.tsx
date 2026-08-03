@@ -61,6 +61,16 @@ export function AppShell({
     return continents.size;
   }, [visitedCountries]);
 
+  const attendeeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const e of entries) {
+      for (const a of e.attendees) {
+        counts[a] = (counts[a] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }, [entries]);
+
   async function refreshData() {
     const [hostsRes, entriesRes] = await Promise.all([
       fetch("/api/hosts"),
@@ -119,6 +129,7 @@ export function AppShell({
           hosts={hosts}
           visitedCount={visitedCountries.size}
           continentCount={continentCount}
+          attendeeCounts={attendeeCounts}
           highlightedHostId={highlightedHostId}
           onHoverHost={setHighlightedHostId}
           isAdmin={isAdmin}
@@ -147,6 +158,7 @@ export function AppShell({
               hosts={hosts}
               visitedCount={visitedCountries.size}
               continentCount={continentCount}
+              attendeeCounts={attendeeCounts}
               highlightedHostId={highlightedHostId}
               onHoverHost={setHighlightedHostId}
               isAdmin={isAdmin}

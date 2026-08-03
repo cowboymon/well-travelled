@@ -37,6 +37,7 @@ export interface EntryWithRelations {
   coHostId: string | null;
   date: string;
   dishes: string[];
+  attendees: string[];
   notes: string | null;
   createdAt: string;
   host: { id: string; name: string; colour: string; initial: string } | null;

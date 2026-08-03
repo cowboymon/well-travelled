@@ -110,6 +110,10 @@ export function EntryPanel({
                     })}
                   />
                   <Row label="Dishes" value={entry.dishes.join(", ") || "—"} />
+                  <Row
+                    label="Attendees"
+                    value={entry.attendees.join(", ") || "—"}
+                  />
                 </tbody>
               </table>
 

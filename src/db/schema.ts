@@ -27,6 +27,7 @@ export const entries = pgTable("entries", {
   }),
   date: date("date").notNull(),
   dishes: text("dishes").array().notNull().default([]),
+  attendees: text("attendees").array().notNull().default([]),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

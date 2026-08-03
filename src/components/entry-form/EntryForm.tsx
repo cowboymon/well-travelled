@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { COUNTRIES } from "@/lib/countries";
 import { HOST_PALETTE } from "@/lib/palette";
+import { ATTENDEES } from "@/lib/attendees";
 import type { EntryRecord, HostRecord } from "@/lib/types";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -30,6 +31,9 @@ export function EntryForm({
   const [coHostId, setCoHostId] = useState(entry?.coHostId ?? "");
   const [date, setDate] = useState(entry?.date?.slice(0, 10) ?? todayISO());
   const [dishesText, setDishesText] = useState(entry?.dishes?.join(", ") ?? "");
+  const [attendees, setAttendees] = useState<string[]>(
+    entry?.attendees ?? []
+  );
   const [notes, setNotes] = useState(entry?.notes ?? "");
   const [files, setFiles] = useState<File[]>([]);
   const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(
@@ -117,6 +121,7 @@ export function EntryForm({
         coHostId: coHostId || null,
         date,
         dishes,
+        attendees,
         notes: notes.trim() || null,
         photoUrls: [...existingPhotoUrls, ...uploaded],
       };
@@ -292,6 +297,34 @@ export function EntryForm({
             placeholder="e.g. Pho, spring rolls"
             className="input"
           />
+        </Field>
+
+        <Field label="Attendees">
+          <div className="flex flex-wrap gap-2">
+            {ATTENDEES.map((name) => {
+              const active = attendees.includes(name);
+              return (
+                <button
+                  type="button"
+                  key={name}
+                  onClick={() =>
+                    setAttendees((prev) =>
+                      prev.includes(name)
+                        ? prev.filter((a) => a !== name)
+                        : [...prev, name]
+                    )
+                  }
+                  className={`rounded-sm border px-3 py-1.5 font-mono-data text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                    active
+                      ? "border-oxblood bg-oxblood text-paper"
+                      : "border-brass/50 text-ink hover:bg-black/5"
+                  }`}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
         </Field>
 
         <Field label="Notes">

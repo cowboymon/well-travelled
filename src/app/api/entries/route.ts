@@ -15,6 +15,7 @@ const entrySchema = z.object({
   coHostId: z.string().uuid().nullable().optional(),
   date: z.string().min(4),
   dishes: z.array(z.string().trim().min(1)).default([]),
+  attendees: z.array(z.string().trim().min(1)).default([]),
   notes: z.string().trim().max(2000).nullable().optional(),
   photoUrls: z.array(z.string().url()).default([]),
 });
