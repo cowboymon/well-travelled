@@ -90,7 +90,10 @@ export function EntryForm({
   );
   const [provisioning, setProvisioning] = useState(false);
 
-  async function provisionHostFromPerson(person: PersonRecord) {
+  async function provisionHostFromPerson(
+    person: PersonRecord,
+    target: "host" | "coHost" = "host"
+  ) {
     setProvisioning(true);
     setError(null);
     try {
@@ -103,7 +106,8 @@ export function EntryForm({
       });
       if (res.ok) {
         const host = await res.json();
-        setHostId(host.id);
+        if (target === "coHost") setCoHostId(host.id);
+        else setHostId(host.id);
         onHostCreated();
       } else {
         const body = await res.json().catch(() => ({}));
@@ -118,10 +122,20 @@ export function EntryForm({
     if (value.startsWith("person:")) {
       const personId = value.slice("person:".length);
       const person = people.find((p) => p.id === personId);
-      if (person) provisionHostFromPerson(person);
+      if (person) provisionHostFromPerson(person, "host");
       return;
     }
     setHostId(value);
+  }
+
+  function onCoHostSelect(value: string) {
+    if (value.startsWith("person:")) {
+      const personId = value.slice("person:".length);
+      const person = people.find((p) => p.id === personId);
+      if (person) provisionHostFromPerson(person, "coHost");
+      return;
+    }
+    setCoHostId(value);
   }
 
   async function createHost() {
@@ -382,10 +396,13 @@ export function EntryForm({
         <Field label="Co-host (optional)">
           <select
             value={coHostId ?? ""}
-            onChange={(e) => setCoHostId(e.target.value)}
+            onChange={(e) => onCoHostSelect(e.target.value)}
+            disabled={provisioning}
             className="input"
           >
-            <option value="">None</option>
+            <option value="">
+              {provisioning ? "Adding host..." : "None"}
+            </option>
             {hosts
               .filter((h) => h.id !== hostId)
               .map((h) => (
@@ -393,6 +410,15 @@ export function EntryForm({
                   {h.name}
                 </option>
               ))}
+            {peopleWithoutHost.length > 0 && (
+              <optgroup label="Add as host">
+                {peopleWithoutHost.map((p) => (
+                  <option key={p.id} value={`person:${p.id}`}>
+                    {p.name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </Field>
 
