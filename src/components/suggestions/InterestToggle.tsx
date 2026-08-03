@@ -75,12 +75,7 @@ export function InterestToggle({
   }
 
   return (
-    <div className="mt-2">
-      {suggestion.interested.length > 0 && (
-        <p className="mb-1.5 font-body text-xs italic text-ink-faded">
-          Interested in hosting: {suggestion.interested.join(", ")}
-        </p>
-      )}
+    <div>
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"

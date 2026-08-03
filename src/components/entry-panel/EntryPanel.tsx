@@ -117,6 +117,11 @@ export function EntryPanel({
                 <p className="mt-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
                   {s.suggestedBy ? `— ${s.suggestedBy}` : "— Someone"}
                 </p>
+                {s.interested.length > 0 && (
+                  <p className="mt-1.5 font-body text-xs italic text-ink-faded">
+                    Interested in hosting: {s.interested.join(", ")}
+                  </p>
+                )}
 
                 <div className="mt-3 flex items-center justify-between gap-2 border-t border-dashed border-[var(--ink-faded)]/30 pt-2">
                   {isMysterySuggestion(s) ? (
