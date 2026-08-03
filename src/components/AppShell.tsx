@@ -143,11 +143,6 @@ export function AppShell({
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden md:flex-row">
       <div className="relative flex-1 bg-ocean/40">
-        <div className="pointer-events-none absolute inset-x-0 top-8 z-10 hidden text-center md:block">
-          <h1 className="font-drama text-5xl font-bold uppercase text-ink lg:text-6xl">
-            On Margaret St
-          </h1>
-        </div>
         <WorldMap
           entries={entries}
           hostById={hostById}
@@ -155,6 +150,7 @@ export function AppShell({
           selectedCountry={selectedCountry}
           onSelectCountry={setSelectedCountry}
           suggestions={suggestions}
+          title="On Margaret St"
         />
         <div
           className={`absolute bottom-4 right-4 flex flex-col items-end gap-2 transition-opacity duration-150 ${

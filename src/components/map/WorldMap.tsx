@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { geoNaturalEarth1 as geoNaturalEarthFallback, geoPath } from "d3-geo";
 import * as d3geo from "d3-geo";
 import { select } from "d3-selection";
@@ -37,6 +37,7 @@ export function WorldMap({
   selectedCountry,
   onSelectCountry,
   suggestions = [],
+  title,
 }: {
   entries: EntryRecord[];
   hostById: Map<string, HostRecord>;
@@ -44,12 +45,34 @@ export function WorldMap({
   selectedCountry: string | null;
   onSelectCountry: (alpha3: string) => void;
   suggestions?: SuggestionRecord[];
+  /** Optional heading rendered just above the map's actual rendered
+   * content — measured against the outline path's real bounding box, not
+   * a guessed pixel offset, so it stays anchored to the map regardless of
+   * how much the SVG letterboxes inside its container. */
+  title?: string;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const outlineRef = useRef<SVGPathElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const zoomLayerRef = useRef<SVGGElement | null>(null);
   const zoomBehaviorRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(
     null
   );
+  const [mapTop, setMapTop] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!title) return;
+    function measure() {
+      if (!outlineRef.current || !wrapperRef.current) return;
+      const outlineRect = outlineRef.current.getBoundingClientRect();
+      const wrapperRect = wrapperRef.current.getBoundingClientRect();
+      setMapTop(outlineRect.top - wrapperRect.top);
+    }
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (wrapperRef.current) observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, [title]);
 
   const countries = useMemo<CountryFeature[]>(() => {
     const topo = topology as unknown as Topology;
@@ -197,7 +220,20 @@ export function WorldMap({
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div ref={wrapperRef} className="relative h-full w-full">
+      {title && (
+        <div
+          className="pointer-events-none absolute inset-x-0 z-10 hidden text-center transition-opacity duration-150 md:block"
+          style={{
+            top: mapTop !== null ? `${Math.max(mapTop - 96, 8)}px` : "8px",
+            opacity: mapTop !== null ? 1 : 0,
+          }}
+        >
+          <h1 className="font-drama text-5xl font-bold uppercase text-ink lg:text-6xl">
+            {title}
+          </h1>
+        </div>
+      )}
       <svg
         ref={svgRef}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -206,7 +242,7 @@ export function WorldMap({
         aria-label="World map of visited countries"
       >
         <g ref={zoomLayerRef}>
-          <path d={outline} fill="var(--ocean)" opacity={0.5} />
+          <path ref={outlineRef} d={outline} fill="var(--ocean)" opacity={0.5} />
           <g>
             {countries.map((c) => {
               const ref = COUNTRY_BY_NUMERIC.get(c.id);
