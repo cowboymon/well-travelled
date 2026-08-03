@@ -88,41 +88,31 @@ export function EntryForm({
   const peopleWithoutHost = people.filter(
     (p) => !hostNames.has(p.name.trim().toLowerCase())
   );
-  const [provisioning, setProvisioning] = useState(false);
+  const [newHostTarget, setNewHostTarget] = useState<"host" | "coHost">(
+    "host"
+  );
 
-  async function provisionHostFromPerson(
+  // Picking someone from "Add as host" doesn't silently create a host in
+  // the background — it opens the existing create-host panel prefilled
+  // with their name, so there's always an explicit "Save host" step before
+  // a new host record actually gets committed.
+  function startCreateFromPerson(
     person: PersonRecord,
-    target: "host" | "coHost" = "host"
+    target: "host" | "coHost"
   ) {
-    setProvisioning(true);
-    setError(null);
-    try {
-      const colour = colourChoices[0]?.hex ?? HOST_PALETTE[0].hex;
-      const initial = person.name.trim().slice(0, 1).toUpperCase() || "?";
-      const res = await fetch("/api/hosts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: person.name, initial, colour }),
-      });
-      if (res.ok) {
-        const host = await res.json();
-        if (target === "coHost") setCoHostId(host.id);
-        else setHostId(host.id);
-        onHostCreated();
-      } else {
-        const body = await res.json().catch(() => ({}));
-        setError(body.error ?? "Could not add host.");
-      }
-    } finally {
-      setProvisioning(false);
-    }
+    setNewHostTarget(target);
+    setNewHostName(person.name);
+    setNewHostNameQuery("");
+    setNewHostInitial(person.name.trim().slice(0, 1).toUpperCase() || "?");
+    setNewHostColour(colourChoices[0]?.hex ?? HOST_PALETTE[0].hex);
+    setShowNewHost(true);
   }
 
   function onHostSelect(value: string) {
     if (value.startsWith("person:")) {
       const personId = value.slice("person:".length);
       const person = people.find((p) => p.id === personId);
-      if (person) provisionHostFromPerson(person, "host");
+      if (person) startCreateFromPerson(person, "host");
       return;
     }
     setHostId(value);
@@ -132,7 +122,7 @@ export function EntryForm({
     if (value.startsWith("person:")) {
       const personId = value.slice("person:".length);
       const person = people.find((p) => p.id === personId);
-      if (person) provisionHostFromPerson(person, "coHost");
+      if (person) startCreateFromPerson(person, "coHost");
       return;
     }
     setCoHostId(value);
@@ -152,7 +142,9 @@ export function EntryForm({
     });
     if (res.ok) {
       const host = await res.json();
-      setHostId(host.id);
+      if (newHostTarget === "coHost") setCoHostId(host.id);
+      else setHostId(host.id);
+      setNewHostTarget("host");
       setShowNewHost(false);
       setNewHostName("");
       setNewHostNameQuery("");
@@ -294,12 +286,9 @@ export function EntryForm({
           <select
             value={hostId}
             onChange={(e) => onHostSelect(e.target.value)}
-            disabled={provisioning}
             className="input"
           >
-            <option value="">
-              {provisioning ? "Adding host..." : "Select host"}
-            </option>
+            <option value="">Select host</option>
             {hosts.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
@@ -397,12 +386,9 @@ export function EntryForm({
           <select
             value={coHostId ?? ""}
             onChange={(e) => onCoHostSelect(e.target.value)}
-            disabled={provisioning}
             className="input"
           >
-            <option value="">
-              {provisioning ? "Adding host..." : "None"}
-            </option>
+            <option value="">None</option>
             {hosts
               .filter((h) => h.id !== hostId)
               .map((h) => (

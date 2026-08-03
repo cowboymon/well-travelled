@@ -1,6 +1,6 @@
 "use client";
 
-import { PassportStamp } from "@/components/ui/PassportStamp";
+import { PassportStamp, formatVisaDate } from "@/components/ui/PassportStamp";
 import { seededRotation } from "@/lib/palette";
 import type { EntryRecord } from "@/lib/types";
 
@@ -44,7 +44,7 @@ export function StampCollection({
               No entries yet — cook a dinner to earn your first stamp.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3">
               {entries.map((entry) => {
                 // Small extra offset (independent of the stamp's own
                 // internal rotation) so the grid reads as scattered, not
@@ -66,8 +66,12 @@ export function StampCollection({
                       id={entry.id}
                       countryCode={entry.countryCode}
                       date={entry.date}
-                      size={100}
+                      size={140}
+                      dateBelow
                     />
+                    <p className="mt-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
+                      {formatVisaDate(entry.date)}
+                    </p>
                   </button>
                 );
               })}

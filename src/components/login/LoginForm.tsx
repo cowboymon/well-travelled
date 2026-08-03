@@ -15,12 +15,12 @@ interface BackgroundStamp {
 // Fixed, sparse layout positions (percent of viewport) — a handful of
 // stamps scattered at varied position/size, not a dense wallpaper.
 const LAYOUT = [
-  { top: "10%", left: "8%", size: 120 },
-  { top: "72%", left: "14%", size: 90 },
-  { top: "18%", left: "84%", size: 100 },
-  { top: "62%", left: "88%", size: 130 },
-  { top: "88%", left: "48%", size: 80 },
-  { top: "6%", left: "46%", size: 70 },
+  { top: "10%", left: "8%", size: 150 },
+  { top: "72%", left: "14%", size: 115 },
+  { top: "18%", left: "84%", size: 130 },
+  { top: "62%", left: "88%", size: 160 },
+  { top: "88%", left: "48%", size: 105 },
+  { top: "6%", left: "46%", size: 95 },
 ];
 
 export function LoginForm({ stamps }: { stamps: BackgroundStamp[] }) {

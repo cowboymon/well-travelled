@@ -42,7 +42,7 @@ const MONTHS = [
 ];
 
 /** Formats an ISO date string (e.g. `2025-11-18`) as a visa-stamp date, e.g. `18 NOV 2025`. */
-function formatVisaDate(dateStr: string): string {
+export function formatVisaDate(dateStr: string): string {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr;
   const day = String(d.getUTCDate()).padStart(2, "0");
@@ -149,6 +149,7 @@ export function PassportStamp({
   date,
   size = 96,
   detail,
+  dateBelow = false,
   className = "",
 }: {
   id: string;
@@ -159,6 +160,10 @@ export function PassportStamp({
    * cleaner reduced layout for small sizes (e.g. the login watermark).
    * Defaults to a threshold on `size` when omitted. */
   detail?: "full" | "simple";
+  /** When true, the stamp itself skips its internal date line (freeing up
+   * space for the shape/code/icon detail) and the caller is responsible
+   * for showing the date as a caption below — see `formatVisaDate`. */
+  dateBelow?: boolean;
   className?: string;
 }) {
   const isFull = detail ? detail === "full" : size >= 60;
@@ -355,60 +360,64 @@ export function PassportStamp({
           </text>
         )}
 
-        {/* tick divider */}
-        <line
-          x1={cx - 8}
-          y1={cy + (isFull ? 17 : 13)}
-          x2={cx + 8}
-          y2={cy + (isFull ? 17 : 13)}
-          stroke={ink}
-          strokeOpacity={0.5}
-          strokeWidth={1}
-        />
+        {!dateBelow && (
+          <>
+            {/* tick divider */}
+            <line
+              x1={cx - 8}
+              y1={cy + (isFull ? 17 : 13)}
+              x2={cx + 8}
+              y2={cy + (isFull ? 17 : 13)}
+              stroke={ink}
+              strokeOpacity={0.5}
+              strokeWidth={1}
+            />
 
-        <text
-          x={cx}
-          y={cy + (isFull ? 25 : 21)}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill={ink}
-          className="font-mono-data uppercase select-none"
-          style={{ fontSize: 6.5, letterSpacing: "0.1em" }}
-        >
-          {visaDate}
-        </text>
+            <text
+              x={cx}
+              y={cy + (isFull ? 25 : 21)}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill={ink}
+              className="font-mono-data uppercase select-none"
+              style={{ fontSize: 6.5, letterSpacing: "0.1em" }}
+            >
+              {visaDate}
+            </text>
+          </>
+        )}
 
         {isFull && (
           <>
             {/* mirrored reference-code corners, in the style of the
                 reference sheets' small flight/entry codes */}
             <text
-              x={cx - r * 0.62}
-              y={cy - r * 0.6}
+              x={cx - r * 0.78}
+              y={cy - r * 0.78}
               textAnchor="middle"
               dominantBaseline="central"
               fill={ink}
               fillOpacity={0.8}
               className="font-mono-data select-none"
-              style={{ fontSize: 5 }}
+              style={{ fontSize: 4.5 }}
             >
               {code}
             </text>
             <text
-              x={cx + r * 0.62}
-              y={cy + r * 0.6}
+              x={cx + r * 0.78}
+              y={cy + r * 0.82}
               textAnchor="middle"
               dominantBaseline="central"
               fill={ink}
               fillOpacity={0.8}
               className="font-mono-data select-none"
-              style={{ fontSize: 5 }}
+              style={{ fontSize: 4.5 }}
             >
               {code}
             </text>
 
             {/* icon glyph, tucked in a corner clear of the text stack */}
-            <g transform={`translate(${cx + r * 0.55}, ${cy - r * 0.62}) scale(0.6)`}>
+            <g transform={`translate(${cx + r * 0.7}, ${cy - r * 0.72}) scale(0.55)`}>
               <IconGlyph icon={icon} colour={ink} />
             </g>
           </>
