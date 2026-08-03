@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f4efe4;
+  --ink: #1c1e26;
+  --ink-faded: #6b6259;
+  --ocean: #c9d3d3;
+  --unvisited-land: #b4b2a9;
+  --oxblood: #7a2e2e;
+  --brass: #b08d57;
+
+  --pin-rust: #993c1d;
+  --pin-ink-blue: #185fa5;
+  --pin-bottle-green: #0f6e56;
+  --pin-violet: #534ab7;
+  --pin-plum: #993556;
+  --pin-ochre: #854f0b;
+  --pin-olive: #3b6d11;
+  --pin-stamp-red: #a32d2d;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-faded: var(--ink-faded);
+  --color-ocean: var(--ocean);
+  --color-unvisited-land: var(--unvisited-land);
+  --color-oxblood: var(--oxblood);
+  --color-brass: var(--brass);
+
+  --font-display: "Gambarino", Georgia, serif;
+  --font-body: "Supreme", system-ui, sans-serif;
+  --font-mono-data: var(--font-dm-mono), "DM Mono", ui-monospace, monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.font-mono-data {
+  font-family: var(--font-mono-data);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background: var(--oxblood);
+  color: var(--paper);
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-stamp-in {
+  animation: stamp-in 180ms ease-out;
+}
+
+@keyframes fade-lift {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-lift {
+  animation: fade-lift 180ms ease-out;
+}
