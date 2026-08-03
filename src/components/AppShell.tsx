@@ -142,13 +142,12 @@ export function AppShell({
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden md:flex-row">
-      <div className="relative flex flex-1 flex-col bg-ocean/40">
-        <div className="hidden shrink-0 py-6 text-center md:block">
+      <div className="relative flex-1 bg-ocean/40">
+        <div className="pointer-events-none absolute inset-x-0 top-8 z-10 hidden text-center md:block">
           <h1 className="font-drama text-5xl font-bold uppercase text-ink lg:text-6xl">
             On Margaret St
           </h1>
         </div>
-        <div className="relative flex-1">
         <WorldMap
           entries={entries}
           hostById={hostById}
@@ -191,7 +190,6 @@ export function AppShell({
               View suggestions ({suggestions.length})
             </button>
           )}
-        </div>
         </div>
       </div>
 
