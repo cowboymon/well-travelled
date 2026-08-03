@@ -7,22 +7,29 @@ import { Legend } from "@/components/legend/Legend";
 import { EntryPanel } from "@/components/entry-panel/EntryPanel";
 import { EntryForm } from "@/components/entry-form/EntryForm";
 import { HostManager } from "@/components/host-manager/HostManager";
+import { SuggestionForm } from "@/components/suggestions/SuggestionForm";
+import { SuggestionsList } from "@/components/suggestions/SuggestionsList";
 import { COUNTRY_BY_ALPHA3 } from "@/lib/countries";
-import type { EntryRecord, HostRecord } from "@/lib/types";
+import type { EntryRecord, HostRecord, SuggestionRecord } from "@/lib/types";
 
 export function AppShell({
   initialHosts,
   initialEntries,
+  initialSuggestions,
   initialIsAdmin,
 }: {
   initialHosts: HostRecord[];
   initialEntries: EntryRecord[];
+  initialSuggestions: SuggestionRecord[];
   initialIsAdmin: boolean;
 }) {
   const router = useRouter();
   const [hosts, setHosts] = useState(initialHosts);
   const [entries, setEntries] = useState(initialEntries);
+  const [suggestions, setSuggestions] = useState(initialSuggestions);
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
+  const [showSuggestionForm, setShowSuggestionForm] = useState(false);
+  const [showSuggestionsList, setShowSuggestionsList] = useState(false);
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [highlightedHostId, setHighlightedHostId] = useState<string | null>(
@@ -63,6 +70,11 @@ export function AppShell({
     if (entriesRes.ok) setEntries(await entriesRes.json());
   }
 
+  async function refreshSuggestions() {
+    const res = await fetch("/api/suggestions");
+    if (res.ok) setSuggestions(await res.json());
+  }
+
   const entriesForSelected = selectedCountry
     ? entries.filter((e) => e.countryCode === selectedCountry)
     : [];
@@ -76,13 +88,30 @@ export function AppShell({
           highlightedHostId={highlightedHostId}
           selectedCountry={selectedCountry}
           onSelectCountry={setSelectedCountry}
+          suggestions={suggestions}
         />
-        <button
-          onClick={() => setShowLegendSheet(true)}
-          className="absolute bottom-4 right-4 rounded-full bg-oxblood px-5 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper shadow-paper-sm md:hidden"
-        >
-          Legend
-        </button>
+        <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+          <button
+            onClick={() => setShowSuggestionForm(true)}
+            className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5"
+          >
+            Suggest a meal
+          </button>
+          {suggestions.length > 0 && (
+            <button
+              onClick={() => setShowSuggestionsList(true)}
+              className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
+            >
+              View suggestions ({suggestions.length})
+            </button>
+          )}
+          <button
+            onClick={() => setShowLegendSheet(true)}
+            className="rounded-full bg-oxblood px-5 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper shadow-paper-sm md:hidden"
+          >
+            Legend
+          </button>
+        </div>
       </div>
 
       <div className="hidden h-full w-[320px] shrink-0 md:block">
@@ -180,6 +209,23 @@ export function AppShell({
           hosts={hosts}
           onClose={() => setShowHostManager(false)}
           onChanged={refreshData}
+        />
+      )}
+
+      {showSuggestionForm && (
+        <SuggestionForm
+          onClose={() => setShowSuggestionForm(false)}
+          onSaved={async () => {
+            setShowSuggestionForm(false);
+            await refreshSuggestions();
+          }}
+        />
+      )}
+
+      {showSuggestionsList && (
+        <SuggestionsList
+          suggestions={suggestions}
+          onClose={() => setShowSuggestionsList(false)}
         />
       )}
 

@@ -44,9 +44,22 @@ export const entryPhotos = pgTable("entry_photos", {
     .defaultNow(),
 });
 
+export const suggestions = pgTable("suggestions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  countryCode: text("country_code").notNull(),
+  dish: text("dish").notNull(),
+  suggestedBy: text("suggested_by"),
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Host = typeof hosts.$inferSelect;
 export type NewHost = typeof hosts.$inferInsert;
 export type Entry = typeof entries.$inferSelect;
 export type NewEntry = typeof entries.$inferInsert;
 export type EntryPhoto = typeof entryPhotos.$inferSelect;
 export type NewEntryPhoto = typeof entryPhotos.$inferInsert;
+export type Suggestion = typeof suggestions.$inferSelect;
+export type NewSuggestion = typeof suggestions.$inferInsert;

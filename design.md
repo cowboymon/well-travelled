@@ -79,6 +79,23 @@ panels read as paper laid on paper, not a default web-app card. Photos keep
 - Layout density (map page is full-bleed; forms are single-column, phone-
   first, under-two-minutes-to-complete).
 
+## Suggestions vs. entries (permanent rule)
+Viewer-submitted meal suggestions ("suggest a meal") are explicitly out of
+the core scope and must never be visually confused with confirmed,
+admin-authored entries:
+- Never render a suggestion as an ink stamp (`Stamp.tsx`) or with any host
+  pin colour — those are reserved for confirmed hosts/dinners.
+- Suggestions use a muted, "pencilled note" language: dashed borders
+  (`border-dashed`), `--ink-faded` / `--brass` only, mono uppercase
+  "Suggested"/"Proposed" labels.
+- On the map, suggested-but-unvisited countries get a small dashed-outline
+  marker at the centroid (a `?` glyph), distinct from the solid double-ring
+  stamps used for hosted dinners.
+- The suggestion form/list still follow the shared modal shell (`rounded-sm`,
+  `.shadow-paper`, brass hairline), but the CTA is a brass hairline outline
+  button (secondary voice), never solid oxblood — suggesting isn't the
+  primary admin action.
+
 ## Exports
 
 ### tokens.css

@@ -85,7 +85,7 @@ function LoginForm() {
       </button>
 
       <p className="mt-6 border-t border-[var(--brass)]/30 pt-4 text-center font-mono-data text-[0.65rem] uppercase tracking-[0.14em] text-[var(--ink-faded)]">
-        A record of dinners taken abroad
+        A record of dinners eaten on Margaret Street
       </p>
     </form>
   );

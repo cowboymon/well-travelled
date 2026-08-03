@@ -1,4 +1,5 @@
 import { desc, eq, sql } from "drizzle-orm";
+import type { NewSuggestion } from "@/db/schema";
 import { getDb, schema } from "@/db";
 
 export interface HostWithCount {
@@ -78,4 +79,30 @@ export async function listEntries(): Promise<EntryWithRelations[]> {
       photos: photosByEntry.get(e.id) ?? [],
     };
   });
+}
+
+export interface SuggestionWithMeta {
+  id: string;
+  countryCode: string;
+  dish: string;
+  suggestedBy: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
+export async function listSuggestions(): Promise<SuggestionWithMeta[]> {
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(schema.suggestions)
+    .orderBy(desc(schema.suggestions.createdAt));
+  return rows.map((r) => ({ ...r, createdAt: r.createdAt as unknown as string }));
+}
+
+export async function createSuggestion(
+  values: NewSuggestion
+): Promise<SuggestionWithMeta> {
+  const db = getDb();
+  const [row] = await db.insert(schema.suggestions).values(values).returning();
+  return { ...row, createdAt: row.createdAt as unknown as string };
 }

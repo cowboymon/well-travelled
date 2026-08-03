@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/AppShell";
-import { listEntries, listHostsWithCounts } from "@/lib/data";
+import { listEntries, listHostsWithCounts, listSuggestions } from "@/lib/data";
 import { isAdminUnlocked } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -7,10 +7,15 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   let hosts: Awaited<ReturnType<typeof listHostsWithCounts>> = [];
   let entries: Awaited<ReturnType<typeof listEntries>> = [];
+  let suggestions: Awaited<ReturnType<typeof listSuggestions>> = [];
   let dbError: string | null = null;
 
   try {
-    [hosts, entries] = await Promise.all([listHostsWithCounts(), listEntries()]);
+    [hosts, entries, suggestions] = await Promise.all([
+      listHostsWithCounts(),
+      listEntries(),
+      listSuggestions(),
+    ]);
   } catch (err) {
     dbError = err instanceof Error ? err.message : "Could not load data.";
   }
@@ -36,6 +41,10 @@ export default async function Home() {
     <AppShell
       initialHosts={hosts.map((h) => ({ ...h, createdAt: String(h.createdAt) }))}
       initialEntries={entries}
+      initialSuggestions={suggestions.map((s) => ({
+        ...s,
+        createdAt: String(s.createdAt),
+      }))}
       initialIsAdmin={isAdmin}
     />
   );

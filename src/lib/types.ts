@@ -25,3 +25,12 @@ export interface EntryRecord {
   coHost: { id: string; name: string; colour: string; initial: string } | null;
   photos: EntryPhotoRecord[];
 }
+
+export interface SuggestionRecord {
+  id: string;
+  countryCode: string;
+  dish: string;
+  suggestedBy: string | null;
+  note: string | null;
+  createdAt: string;
+}
