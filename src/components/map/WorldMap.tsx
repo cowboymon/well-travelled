@@ -156,31 +156,28 @@ export function WorldMap({
               const d = path(feat);
               if (!d) return null;
 
-              // A fixed-width selection stroke re-traces the country's own
-              // path. For a small/thin country geometry (e.g. Vatican,
-              // Singapore, archipelago nations), that stroke width is huge
-              // relative to the shape's own bounding box, and the many
-              // close-together vertices of a tiny polygon plus a thick
-              // stroke's miter joins render as overlapping visual noise —
-              // "melted" edges around the selection. Below a size threshold,
-              // skip stroking the path itself and use a stamp-anchored
-              // highlight ring at the centroid instead (rendered in the
-              // markers layer below), which scales sensibly regardless of
-              // the underlying country geometry's size.
-              const bounds = path.bounds(feat);
-              const boundsWidth = bounds[1][0] - bounds[0][0];
-              const boundsHeight = bounds[1][1] - bounds[0][1];
-              const isTiny = Math.max(boundsWidth, boundsHeight) < 6;
-              const strokeSelected = isSelected && !isTiny;
+              // Never re-stroke the country's own path to show selection.
+              // A bounding-box "is this tiny" threshold isn't reliable —
+              // archipelago / thin-coastline countries (Croatia, Greece,
+              // Philippines, the Balkan states) have plenty of bounding-box
+              // area but are made of many thin, close-together path
+              // fragments; any stroke width thick enough to read as a
+              // highlight overlaps itself across those fragments and reads
+              // as visual noise ("melted" edges), independent of overall
+              // country size. Selection is communicated solely via fill
+              // (below) plus the centroid ring drawn in the markers layer,
+              // which scales sensibly regardless of the underlying
+              // geometry's shape.
+              const fillBoost = isSelected ? 0.15 : 0;
 
               return (
                 <path
                   key={c.id}
                   d={d}
                   fill={visited ? "#DCD2B8" : "var(--unvisited-land)"}
-                  fillOpacity={visited ? 0.9 : 0.55}
-                  stroke={strokeSelected ? "var(--oxblood)" : "var(--paper)"}
-                  strokeWidth={strokeSelected ? 1.2 : 0.4}
+                  fillOpacity={(visited ? 0.9 : 0.55) + fillBoost}
+                  stroke="var(--paper)"
+                  strokeWidth={0.4}
                   className="cursor-pointer transition-colors duration-150"
                   onClick={() => alpha3 && onSelectCountry(alpha3)}
                 />
@@ -197,11 +194,6 @@ export function WorldMap({
                 const c = countries.find((cc) => cc.id === ref.numeric);
                 if (!c) return null;
                 const feat = c as unknown as GeoJSON.Feature;
-                const bounds = path.bounds(feat);
-                const boundsWidth = bounds[1][0] - bounds[0][0];
-                const boundsHeight = bounds[1][1] - bounds[0][1];
-                const isTiny = Math.max(boundsWidth, boundsHeight) < 6;
-                if (!isTiny) return null;
                 const centroid = path.centroid(feat);
                 if (!centroid || Number.isNaN(centroid[0])) return null;
                 return (
