@@ -166,7 +166,7 @@ export function AppShell({
             disabled={drawing}
             className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5 disabled:opacity-50"
           >
-            {drawing ? "Drawing..." : "🎲 Draw a mystery country"}
+            {drawing ? "Drawing..." : "Draw a mystery country"}
           </button>
           {suggestions.length > 0 && (
             <button

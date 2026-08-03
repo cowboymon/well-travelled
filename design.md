@@ -98,24 +98,33 @@ entries:
   (`border-dashed`), `--ink-faded` / `--brass` only, mono uppercase
   "Suggested"/"Proposed" labels.
 - On the map, suggested-but-unvisited countries get a small dashed-outline
-  marker at the centroid (a `?` glyph), distinct from the solid double-ring
-  stamps used for hosted dinners.
+  marker at the centroid (a `?` glyph) by default. If the suggestion was
+  mystery-drawn AND has an assigned person, it instead gets a small dart
+  marker (oxblood, shaft + tip + feathered tail) with that person's name
+  above it — visually distinct from both the plain `?` marker and the
+  solid double-ring host stamps.
 - The suggestion form/list still follow the shared modal shell (`rounded-sm`,
   `.shadow-paper`, brass hairline), but the CTA is a brass hairline outline
   button (secondary voice), never solid oxblood — suggesting isn't the
   primary admin action.
+- No emoji anywhere in the UI — buttons and labels are plain mono/display
+  text per the rest of the system's typography rules.
 
 ## Suggestions extensions (permanent rule)
 - Mystery-drawn suggestions (the "Draw a mystery country" button) are plain
   suggestion rows — no extra DB column — distinguished only by their note
-  text always starting with `🎲 Mystery assignment —`, so they read
-  differently from a human-written note without adding schema.
+  text always starting with `Mystery assignment —` (plain text, no emoji),
+  so they read differently from a human-written note without adding schema.
+  The shared `isMysterySuggestion()` helper in `src/lib/suggestions.ts` is
+  the single source of truth for this check (used by both the map marker
+  and anywhere else that needs to tell mystery vs. human suggestions apart).
 - Expressing interest in a suggestion ("I'm interested in hosting this") is
   viewer-level like the rest of the suggestions system — no admin gate.
   Interest is a `text[]` column on `suggestions` (same pattern as
-  `entries.attendees`), rendered as a muted mono `Interested: ...` line —
-  never a host-colour stamp, consistent with the suggestions-vs-entries
-  rule above.
+  `entries.attendees`). The interested-names list and the toggle button are
+  two visually separate lines/elements (italic body text for the names,
+  a bordered brass button for the toggle) — never merged into one line, so
+  they don't read as the same control.
 
 ## Exports
 

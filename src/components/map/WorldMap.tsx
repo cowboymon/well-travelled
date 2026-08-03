@@ -11,6 +11,7 @@ import type { Topology, GeometryCollection } from "topojson-specification";
 import topology from "world-atlas/countries-110m.json";
 import { COUNTRY_BY_NUMERIC } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
+import { isMysterySuggestion } from "@/lib/suggestions";
 import type { EntryRecord, HostRecord, SuggestionRecord } from "@/lib/types";
 
 const geoNaturalEarth =
@@ -78,12 +79,18 @@ export function WorldMap({
     return map;
   }, [entries]);
 
-  const suggestedCountries = useMemo(() => {
-    const set = new Set<string>();
+  // One representative suggestion per unvisited country. When it's a
+  // mystery-drawn suggestion with a name attached, the map shows a dart
+  // marker with that person's name instead of the plain "?" — distinct
+  // from both the host ink stamp and the generic open-suggestion marker.
+  const suggestionByCountry = useMemo(() => {
+    const map = new Map<string, SuggestionRecord>();
     for (const s of suggestions) {
-      if (!latestByCountry.has(s.countryCode)) set.add(s.countryCode);
+      if (!latestByCountry.has(s.countryCode) && !map.has(s.countryCode)) {
+        map.set(s.countryCode, s);
+      }
     }
-    return set;
+    return map;
   }, [suggestions, latestByCountry]);
 
   const reduceMotion =
@@ -307,9 +314,53 @@ export function WorldMap({
             })}
           </g>
           <g>
-            {[...suggestedCountries].map((alpha3) => {
+            {[...suggestionByCountry.entries()].map(([alpha3, suggestion]) => {
               const centroid = countryCentroid(alpha3);
               if (!centroid) return null;
+              const isMystery =
+                isMysterySuggestion(suggestion) && Boolean(suggestion.suggestedBy);
+
+              if (isMystery) {
+                return (
+                  <g
+                    key={`suggestion-${alpha3}`}
+                    transform={`translate(${centroid[0]}, ${centroid[1]})`}
+                    className="cursor-pointer"
+                    onClick={() => onSelectCountry(alpha3)}
+                  >
+                    {/* invisible larger hit target, min ~44px screen px worth of svg units */}
+                    <circle r={16} fill="transparent" />
+                    {/* dart: shaft + tip pointing at the centroid, feathered tail */}
+                    <g stroke="var(--oxblood)" strokeWidth={1}>
+                      <line x1={0} y1={-11} x2={0} y2={3} />
+                      <polygon
+                        points="0,3 -1.6,-1 1.6,-1"
+                        fill="var(--oxblood)"
+                      />
+                      <polygon
+                        points="0,-11 -3,-7 0,-8.3"
+                        fill="var(--oxblood)"
+                        opacity={0.75}
+                      />
+                      <polygon
+                        points="0,-11 3,-7 0,-8.3"
+                        fill="var(--oxblood)"
+                        opacity={0.75}
+                      />
+                    </g>
+                    <text
+                      textAnchor="middle"
+                      y={-14}
+                      fontSize={6}
+                      fill="var(--oxblood)"
+                      className="font-mono-data uppercase tracking-wide select-none"
+                    >
+                      {suggestion.suggestedBy}
+                    </text>
+                  </g>
+                );
+              }
+
               return (
                 <g
                   key={`suggestion-${alpha3}`}

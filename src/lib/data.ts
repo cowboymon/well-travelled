@@ -2,6 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { NewSuggestion, NewComment } from "@/db/schema";
 import { getDb, schema } from "@/db";
 import { COUNTRIES } from "@/lib/countries";
+import { MYSTERY_NOTE_PREFIX } from "@/lib/suggestions";
 
 export interface PersonRecord {
   id: string;
@@ -97,8 +98,6 @@ export interface SuggestionWithMeta {
   interested: string[];
   createdAt: string;
 }
-
-const MYSTERY_NOTE_PREFIX = "🎲 Mystery assignment —";
 
 export async function listSuggestions(): Promise<SuggestionWithMeta[]> {
   const db = getDb();

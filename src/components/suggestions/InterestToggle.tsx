@@ -76,19 +76,19 @@ export function InterestToggle({
 
   return (
     <div className="mt-2">
-      <div className="flex flex-wrap items-center gap-2">
-        {suggestion.interested.length > 0 && (
-          <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
-            Interested: {suggestion.interested.join(", ")}
-          </p>
-        )}
+      {suggestion.interested.length > 0 && (
+        <p className="mb-1.5 font-body text-xs italic text-ink-faded">
+          Interested in hosting: {suggestion.interested.join(", ")}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={onMainClick}
           disabled={saving}
-          className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-[var(--brass)] hover:text-ink disabled:opacity-50"
+          className="rounded-sm border border-[var(--brass)]/60 px-2 py-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-[var(--brass)] hover:bg-black/5 hover:text-ink disabled:opacity-50"
         >
-          {isInterested ? "Not interested anymore" : "I'm interested"}
+          {isInterested ? "Not interested anymore" : "I'm interested in hosting"}
         </button>
         {whoAmI && (
           <button
