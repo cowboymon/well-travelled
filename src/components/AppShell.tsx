@@ -96,6 +96,22 @@ export function AppShell({
     ? suggestions.filter((s) => s.countryCode === selectedCountry)
     : [];
 
+  function promoteSuggestion(suggestion: SuggestionRecord) {
+    setShowEntryForm({
+      entry: null,
+      defaultCountryCode: suggestion.countryCode,
+      defaultNotes: [
+        suggestion.suggestedBy
+          ? `Suggested by ${suggestion.suggestedBy}.`
+          : "Suggested by a viewer.",
+        suggestion.note ?? "",
+      ]
+        .filter(Boolean)
+        .join(" "),
+      promoteSuggestionId: suggestion.id,
+    });
+  }
+
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden md:flex-row">
       <div className="relative flex-1 bg-ocean/40">
@@ -107,7 +123,11 @@ export function AppShell({
           onSelectCountry={setSelectedCountry}
           suggestions={suggestions}
         />
-        <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+        <div
+          className={`absolute bottom-4 right-4 flex flex-col items-end gap-2 transition-opacity duration-150 ${
+            selectedCountry ? "md:pointer-events-none md:opacity-0" : ""
+          }`}
+        >
           <button
             onClick={() =>
               setShowEntryForm({ entry: null, defaultCountryCode: null })
@@ -175,21 +195,7 @@ export function AppShell({
           onSuggestForCountry={(code) =>
             setShowSuggestionForm({ defaultCountryCode: code })
           }
-          onPromoteSuggestion={(suggestion) =>
-            setShowEntryForm({
-              entry: null,
-              defaultCountryCode: suggestion.countryCode,
-              defaultNotes: [
-                suggestion.suggestedBy
-                  ? `Suggested by ${suggestion.suggestedBy}.`
-                  : "Suggested by a viewer.",
-                suggestion.note ?? "",
-              ]
-                .filter(Boolean)
-                .join(" "),
-              promoteSuggestionId: suggestion.id,
-            })
-          }
+          onPromoteSuggestion={promoteSuggestion}
         />
       )}
 
@@ -238,6 +244,10 @@ export function AppShell({
         <SuggestionsList
           suggestions={suggestions}
           onClose={() => setShowSuggestionsList(false)}
+          onPromoteSuggestion={(suggestion) => {
+            setShowSuggestionsList(false);
+            promoteSuggestion(suggestion);
+          }}
         />
       )}
 

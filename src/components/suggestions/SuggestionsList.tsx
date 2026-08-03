@@ -6,9 +6,11 @@ import type { SuggestionRecord } from "@/lib/types";
 export function SuggestionsList({
   suggestions,
   onClose,
+  onPromoteSuggestion,
 }: {
   suggestions: SuggestionRecord[];
   onClose: () => void;
+  onPromoteSuggestion: (suggestion: SuggestionRecord) => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -48,11 +50,22 @@ export function SuggestionsList({
                   {s.note}
                 </p>
               )}
-              {s.suggestedBy && (
-                <p className="mt-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
-                  &mdash; {s.suggestedBy}
-                </p>
-              )}
+              <div className="mt-1 flex items-center justify-between gap-2">
+                {s.suggestedBy ? (
+                  <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
+                    &mdash; {s.suggestedBy}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <button
+                  type="button"
+                  onClick={() => onPromoteSuggestion(s)}
+                  className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-oxblood hover:opacity-70"
+                >
+                  Promote to entry
+                </button>
+              </div>
             </li>
           ))}
           {suggestions.length === 0 && (
