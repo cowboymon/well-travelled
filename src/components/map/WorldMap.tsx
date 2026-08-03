@@ -90,6 +90,23 @@ export function WorldMap({
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+  // Shared centroid lookup (local map coordinate space) reused by the
+  // stamp/suggestion marker layers and the mobile initial-zoom logic below.
+  const countryCentroid = useMemo(() => {
+    const byAlpha3 = new Map<string, CountryFeature>();
+    for (const ref of COUNTRY_BY_NUMERIC.values()) {
+      const c = countries.find((cc) => cc.id === ref.numeric);
+      if (c) byAlpha3.set(ref.alpha3, c);
+    }
+    return (alpha3: string): [number, number] | null => {
+      const c = byAlpha3.get(alpha3);
+      if (!c) return null;
+      const centroid = path.centroid(c as unknown as GeoJSON.Feature);
+      if (!centroid || Number.isNaN(centroid[0])) return null;
+      return centroid;
+    };
+  }, [countries, path]);
+
   useEffect(() => {
     if (!svgRef.current || !zoomLayerRef.current) return;
     const svg = select(svgRef.current);
@@ -114,6 +131,43 @@ export function WorldMap({
       svg.on(".zoom", null);
     };
   }, []);
+
+  // One-time mobile initial view: zoom to the centroid of visited-country
+  // centroids on first mount only. Desktop is untouched; the map remains
+  // fully pannable/zoomable afterward via the same behavior.
+  const didInitialMobileZoom = useRef(false);
+  useEffect(() => {
+    if (didInitialMobileZoom.current) return;
+    if (!svgRef.current || !zoomBehaviorRef.current) return;
+    if (typeof window === "undefined") return;
+    if (window.innerWidth >= 768) return; // md breakpoint — desktop untouched
+    didInitialMobileZoom.current = true;
+
+    const codes = [...latestByCountry.keys()];
+    if (codes.length === 0) return; // fresh install: keep default full view
+
+    const points = codes
+      .map((code) => countryCentroid(code))
+      .filter((p): p is [number, number] => p !== null);
+    if (points.length === 0) return;
+
+    const avgX = points.reduce((sum, p) => sum + p[0], 0) / points.length;
+    const avgY = points.reduce((sum, p) => sum + p[1], 0) / points.length;
+
+    const scale = 2.5;
+    const transform = zoomIdentity
+      .translate(WIDTH / 2, HEIGHT / 2)
+      .scale(scale)
+      .translate(-avgX, -avgY);
+
+    const svg = select(svgRef.current);
+    const duration = reduceMotion ? 0 : 180;
+    svg
+      .transition()
+      .duration(duration)
+      .call(zoomBehaviorRef.current.transform, transform);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [latestByCountry, countryCentroid]);
 
   function zoomBy(factor: number) {
     if (!svgRef.current || !zoomBehaviorRef.current) return;
@@ -187,15 +241,8 @@ export function WorldMap({
           <g>
             {selectedCountry &&
               (() => {
-                const ref = [...COUNTRY_BY_NUMERIC.values()].find(
-                  (v) => v.alpha3 === selectedCountry
-                );
-                if (!ref) return null;
-                const c = countries.find((cc) => cc.id === ref.numeric);
-                if (!c) return null;
-                const feat = c as unknown as GeoJSON.Feature;
-                const centroid = path.centroid(feat);
-                if (!centroid || Number.isNaN(centroid[0])) return null;
+                const centroid = countryCentroid(selectedCountry);
+                if (!centroid) return null;
                 return (
                   <circle
                     cx={centroid[0]}
@@ -211,14 +258,8 @@ export function WorldMap({
           </g>
           <g>
             {[...latestByCountry.entries()].map(([alpha3, entry]) => {
-              const ref = [...COUNTRY_BY_NUMERIC.values()].find(
-                (v) => v.alpha3 === alpha3
-              );
-              if (!ref) return null;
-              const c = countries.find((cc) => cc.id === ref.numeric);
-              if (!c) return null;
-              const centroid = path.centroid(c as unknown as GeoJSON.Feature);
-              if (!centroid || Number.isNaN(centroid[0])) return null;
+              const centroid = countryCentroid(alpha3);
+              if (!centroid) return null;
               const host = hostById.get(entry.hostId);
               if (!host) return null;
               const dimmed = Boolean(
@@ -267,14 +308,8 @@ export function WorldMap({
           </g>
           <g>
             {[...suggestedCountries].map((alpha3) => {
-              const ref = [...COUNTRY_BY_NUMERIC.values()].find(
-                (v) => v.alpha3 === alpha3
-              );
-              if (!ref) return null;
-              const c = countries.find((cc) => cc.id === ref.numeric);
-              if (!c) return null;
-              const centroid = path.centroid(c as unknown as GeoJSON.Feature);
-              if (!centroid || Number.isNaN(centroid[0])) return null;
+              const centroid = countryCentroid(alpha3);
+              if (!centroid) return null;
               return (
                 <g
                   key={`suggestion-${alpha3}`}

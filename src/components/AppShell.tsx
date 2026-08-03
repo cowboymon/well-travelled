@@ -28,7 +28,9 @@ export function AppShell({
   const [entries, setEntries] = useState(initialEntries);
   const [suggestions, setSuggestions] = useState(initialSuggestions);
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
-  const [showSuggestionForm, setShowSuggestionForm] = useState(false);
+  const [showSuggestionForm, setShowSuggestionForm] = useState<{
+    defaultCountryCode: string | null;
+  } | null>(null);
   const [showSuggestionsList, setShowSuggestionsList] = useState(false);
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export function AppShell({
   } | null>(null);
   const [showHostManager, setShowHostManager] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [showLegendSheet, setShowLegendSheet] = useState(false);
+  const [showMobileAdminMenu, setShowMobileAdminMenu] = useState(false);
 
   const hostById = useMemo(
     () => new Map(hosts.map((h) => [h.id, h])),
@@ -102,7 +104,7 @@ export function AppShell({
         />
         <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
           <button
-            onClick={() => setShowSuggestionForm(true)}
+            onClick={() => setShowSuggestionForm({ defaultCountryCode: null })}
             className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5"
           >
             Suggest a country
@@ -115,11 +117,16 @@ export function AppShell({
               View suggestions ({suggestions.length})
             </button>
           )}
+        </div>
+
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
           <button
-            onClick={() => setShowLegendSheet(true)}
-            className="rounded-full bg-oxblood px-5 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper shadow-paper-sm md:hidden"
+            onClick={() =>
+              isAdmin ? setShowMobileAdminMenu(true) : setShowAdminLogin(true)
+            }
+            className="rounded-sm border border-brass/50 bg-paper/90 px-3 py-1.5 font-mono-data text-[10px] uppercase tracking-[0.14em] text-ink-faded shadow-paper-sm hover:text-ink"
           >
-            Legend
+            Admin
           </button>
         </div>
       </div>
@@ -145,40 +152,48 @@ export function AppShell({
         />
       </div>
 
-      {showLegendSheet && (
+      {showMobileAdminMenu && (
         <div
           className="fixed inset-0 z-30 flex items-end bg-black/30 md:hidden"
-          onClick={() => setShowLegendSheet(false)}
+          onClick={() => setShowMobileAdminMenu(false)}
         >
           <div
-            className="max-h-[75vh] w-full"
+            className="w-full rounded-t-sm border-t border-brass/40 bg-paper p-6 shadow-paper animate-fade-lift"
             onClick={(e) => e.stopPropagation()}
           >
-            <Legend
-              hosts={hosts}
-              visitedCount={visitedCountries.size}
-              continentCount={continentCount}
-              attendeeCounts={attendeeCounts}
-              highlightedHostId={highlightedHostId}
-              onHoverHost={setHighlightedHostId}
-              isAdmin={isAdmin}
-              onManageHosts={() => {
-                setShowLegendSheet(false);
-                setShowHostManager(true);
-              }}
-              onAddEntry={() => {
-                setShowLegendSheet(false);
-                setShowEntryForm({ entry: null, defaultCountryCode: null });
-              }}
-              onLogoutAdmin={async () => {
-                await fetch("/api/auth/admin", { method: "DELETE" });
-                setIsAdmin(false);
-              }}
-              onUnlockAdmin={() => {
-                setShowLegendSheet(false);
-                setShowAdminLogin(true);
-              }}
-            />
+            <p className="mb-4 font-mono-data text-[11px] uppercase tracking-[0.2em] text-ink-faded">
+              Admin
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  setShowMobileAdminMenu(false);
+                  setShowEntryForm({ entry: null, defaultCountryCode: null });
+                }}
+                className="rounded-sm bg-oxblood px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper transition-opacity hover:opacity-90"
+              >
+                + Add entry
+              </button>
+              <button
+                onClick={() => {
+                  setShowMobileAdminMenu(false);
+                  setShowHostManager(true);
+                }}
+                className="rounded-sm border border-brass/50 px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:bg-black/5"
+              >
+                Manage hosts
+              </button>
+              <button
+                onClick={async () => {
+                  await fetch("/api/auth/admin", { method: "DELETE" });
+                  setIsAdmin(false);
+                  setShowMobileAdminMenu(false);
+                }}
+                className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
+              >
+                Exit admin mode
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -198,6 +213,9 @@ export function AppShell({
           }}
           onAddForCountry={(code) =>
             setShowEntryForm({ entry: null, defaultCountryCode: code })
+          }
+          onSuggestForCountry={(code) =>
+            setShowSuggestionForm({ defaultCountryCode: code })
           }
         />
       )}
@@ -226,9 +244,10 @@ export function AppShell({
 
       {showSuggestionForm && (
         <SuggestionForm
-          onClose={() => setShowSuggestionForm(false)}
+          defaultCountryCode={showSuggestionForm.defaultCountryCode}
+          onClose={() => setShowSuggestionForm(null)}
           onSaved={async () => {
-            setShowSuggestionForm(false);
+            setShowSuggestionForm(null);
             await refreshSuggestions();
           }}
         />

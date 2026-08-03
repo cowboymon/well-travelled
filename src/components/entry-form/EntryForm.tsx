@@ -77,6 +77,51 @@ export function EntryForm({
   );
   const colourChoices = availableColours.length ? availableColours : HOST_PALETTE;
 
+  // Anyone in the shared roster (people table) can become a host, not just
+  // the people who already have a host record. People without one yet show
+  // up as a separate group in the picker and get a host row auto-provisioned
+  // (default colour/initial) the moment they're picked — no detour through
+  // "+ Add new host" required.
+  const hostNames = new Set(hosts.map((h) => h.name.trim().toLowerCase()));
+  const peopleWithoutHost = people.filter(
+    (p) => !hostNames.has(p.name.trim().toLowerCase())
+  );
+  const [provisioning, setProvisioning] = useState(false);
+
+  async function provisionHostFromPerson(person: PersonRecord) {
+    setProvisioning(true);
+    setError(null);
+    try {
+      const colour = colourChoices[0]?.hex ?? HOST_PALETTE[0].hex;
+      const initial = person.name.trim().slice(0, 1).toUpperCase() || "?";
+      const res = await fetch("/api/hosts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: person.name, initial, colour }),
+      });
+      if (res.ok) {
+        const host = await res.json();
+        setHostId(host.id);
+        onHostCreated();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? "Could not add host.");
+      }
+    } finally {
+      setProvisioning(false);
+    }
+  }
+
+  function onHostSelect(value: string) {
+    if (value.startsWith("person:")) {
+      const personId = value.slice("person:".length);
+      const person = people.find((p) => p.id === personId);
+      if (person) provisionHostFromPerson(person);
+      return;
+    }
+    setHostId(value);
+  }
+
   async function createHost() {
     const name = (newHostName || newHostNameQuery).trim();
     if (!name || !newHostInitial.trim()) return;
@@ -232,15 +277,27 @@ export function EntryForm({
         <Field label="Host">
           <select
             value={hostId}
-            onChange={(e) => setHostId(e.target.value)}
+            onChange={(e) => onHostSelect(e.target.value)}
+            disabled={provisioning}
             className="input"
           >
-            <option value="">Select host</option>
+            <option value="">
+              {provisioning ? "Adding host..." : "Select host"}
+            </option>
             {hosts.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
             ))}
+            {peopleWithoutHost.length > 0 && (
+              <optgroup label="Add as host">
+                {peopleWithoutHost.map((p) => (
+                  <option key={p.id} value={`person:${p.id}`}>
+                    {p.name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
           {!showNewHost ? (
             <button

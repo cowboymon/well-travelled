@@ -14,6 +14,7 @@ export function EntryPanel({
   onEdit,
   onDelete,
   onAddForCountry,
+  onSuggestForCountry,
 }: {
   countryCode: string;
   entries: EntryRecord[];
@@ -22,6 +23,7 @@ export function EntryPanel({
   onEdit: (entry: EntryRecord) => void;
   onDelete: (entry: EntryRecord) => void;
   onAddForCountry: (countryCode: string) => void;
+  onSuggestForCountry: (countryCode: string) => void;
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(
@@ -63,12 +65,28 @@ export function EntryPanel({
           </button>
         </div>
 
+        {sorted.length === 0 && (
+          <div className="mb-6 rounded-sm border border-dashed border-brass/50 p-4">
+            <p className="mb-3 font-mono-data text-xs text-ink-faded">
+              No entries here yet.
+            </p>
+            <button
+              onClick={() => onSuggestForCountry(countryCode)}
+              className="w-full rounded-sm border border-brass/60 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:bg-black/5"
+            >
+              Suggest this country
+            </button>
+          </div>
+        )}
+
         {isAdmin && (
           <button
             onClick={() => onAddForCountry(countryCode)}
             className="mb-6 w-full rounded-sm border border-brass/50 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink hover:bg-black/5"
           >
-            + Add another entry for this country
+            {sorted.length === 0
+              ? "+ Add an entry for this country"
+              : "+ Add another entry for this country"}
           </button>
         )}
 
@@ -221,7 +239,7 @@ function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 animate-fade-lift"
+      className="pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 animate-fade-lift"
       onClick={onClose}
     >
       <button
@@ -273,7 +291,7 @@ function Lightbox({
 }
 
 function CommentsSection({ entryId }: { entryId: string }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState<CommentRecord[]>([]);
@@ -285,6 +303,11 @@ function CommentsSection({ entryId }: { entryId: string }) {
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loaded) loadComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entryId]);
 
   useEffect(() => {
     if (!showForm || people.length > 0) return;

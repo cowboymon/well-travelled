@@ -4,14 +4,16 @@ import { FormEvent, useMemo, useState } from "react";
 import { COUNTRIES } from "@/lib/countries";
 
 export function SuggestionForm({
+  defaultCountryCode,
   onClose,
   onSaved,
 }: {
+  defaultCountryCode?: string | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const [countryQuery, setCountryQuery] = useState("");
-  const [countryCode, setCountryCode] = useState("");
+  const [countryCode, setCountryCode] = useState(defaultCountryCode ?? "");
   const [suggestedBy, setSuggestedBy] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
