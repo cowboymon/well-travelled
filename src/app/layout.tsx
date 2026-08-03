@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en" className={`${dmMono.variable} h-full antialiased`}>
       <head>
         <link
-          href="https://api.fontshare.com/v2/css?f[]=gambarino@400&f[]=supreme@400&display=swap"
+          href="https://api.fontshare.com/v2/css?f[]=gambarino@400&f[]=supreme@400&f[]=melodrama@700&display=swap"
           rel="stylesheet"
         />
       </head>

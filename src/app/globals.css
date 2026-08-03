@@ -32,6 +32,7 @@
   --font-display: "Gambarino", Georgia, serif;
   --font-body: "Supreme", system-ui, sans-serif;
   --font-mono-data: var(--font-dm-mono), "DM Mono", ui-monospace, monospace;
+  --font-drama: "Melodrama", "Gambarino", Georgia, serif;
 }
 
 html,
@@ -55,6 +56,10 @@ body {
 
 .font-display {
   font-family: var(--font-display);
+}
+
+.font-drama {
+  font-family: var(--font-drama);
 }
 
 ::selection {

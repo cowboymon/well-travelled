@@ -37,6 +37,11 @@ plum #993556 · ochre #854F0B · olive #3B6D11 · stamp red #A32D2D
 - Mono: DM Mono 300/400 — dates, codes, stats, labels, form fields.
   Uppercase, letterspaced ~0.14em.
 - No italic headers. Italic reserved for the notes/running-joke field only.
+- Drama: Melodrama 700 (`.font-drama`, falls back to Gambarino) — reserved
+  for the one large centred "On Margaret Street" title above the map on
+  desktop. Not a general-purpose display face; don't reach for it
+  elsewhere — it's intentionally a one-off flourish, not part of the
+  regular type system.
 
 ## Spacing
 Tailwind default scale, used consistently (no ad-hoc pixel values in
