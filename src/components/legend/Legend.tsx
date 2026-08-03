@@ -79,14 +79,16 @@ export function Legend({
       <AttendeeLog counts={attendeeCounts} />
 
       <div className="flex flex-col gap-2 border-t border-brass/30 pt-4">
+        {/* Adding an entry only requires having signed in past the site
+            password — it's no longer an admin-only action. */}
+        <button
+          onClick={onAddEntry}
+          className="rounded-sm bg-oxblood px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper transition-opacity hover:opacity-90"
+        >
+          + Add entry
+        </button>
         {isAdmin ? (
           <>
-            <button
-              onClick={onAddEntry}
-              className="rounded-sm bg-oxblood px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper transition-opacity hover:opacity-90"
-            >
-              + Add entry
-            </button>
             <button
               onClick={onManageHosts}
               className="rounded-sm border border-brass/50 px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:bg-black/5"

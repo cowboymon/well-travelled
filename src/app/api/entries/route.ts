@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { desc } from "drizzle-orm";
 import { getDb, schema } from "@/db";
-import { requireAdmin } from "@/lib/session";
+import { isSiteUnlocked } from "@/lib/session";
 import { COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 
 const entrySchema = z.object({
@@ -48,8 +48,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await requireAdmin(req))) {
-    return NextResponse.json({ error: "Admin required." }, { status: 403 });
+  if (!(await isSiteUnlocked())) {
+    return NextResponse.json({ error: "Sign in required." }, { status: 403 });
   }
   const body = await req.json().catch(() => null);
   const parsed = entrySchema.safeParse(body);

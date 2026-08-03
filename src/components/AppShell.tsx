@@ -104,6 +104,14 @@ export function AppShell({
         />
         <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
           <button
+            onClick={() =>
+              setShowEntryForm({ entry: null, defaultCountryCode: null })
+            }
+            className="rounded-sm bg-oxblood px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-paper shadow-paper-sm transition-opacity hover:opacity-90 md:hidden"
+          >
+            + Add entry
+          </button>
+          <button
             onClick={() => setShowSuggestionForm({ defaultCountryCode: null })}
             className="rounded-sm border border-brass/60 bg-paper/90 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink shadow-paper-sm transition-colors hover:bg-black/5"
           >

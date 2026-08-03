@@ -79,16 +79,15 @@ export function EntryPanel({
           </div>
         )}
 
-        {isAdmin && (
-          <button
-            onClick={() => onAddForCountry(countryCode)}
-            className="mb-6 w-full rounded-sm border border-brass/50 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink hover:bg-black/5"
-          >
-            {sorted.length === 0
-              ? "+ Add an entry for this country"
-              : "+ Add another entry for this country"}
-          </button>
-        )}
+        {/* Adding an entry only needs the site password, not admin. */}
+        <button
+          onClick={() => onAddForCountry(countryCode)}
+          className="mb-6 w-full rounded-sm border border-brass/50 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink hover:bg-black/5"
+        >
+          {sorted.length === 0
+            ? "+ Add an entry for this country"
+            : "+ Add another entry for this country"}
+        </button>
 
         <div className="flex flex-col gap-8">
           {sorted.map((entry, idx) => (

@@ -79,10 +79,19 @@ panels read as paper laid on paper, not a default web-app card. Photos keep
 - Layout density (map page is full-bleed; forms are single-column, phone-
   first, under-two-minutes-to-complete).
 
+## Access model
+- Site password: gates viewing the whole app.
+- Admin password: gates editing/deleting entries, and all host management
+  (create/edit/delete/colour/initial).
+- Creating a new entry (and adding attendees/photos/notes to it) only
+  requires the site password — any signed-in viewer can log a dinner, not
+  just the admin. Editing or deleting an existing entry still requires
+  admin.
+
 ## Suggestions vs. entries (permanent rule)
 Viewer-submitted country suggestions ("suggest a country") are explicitly
-out of the core scope and must never be visually confused with confirmed,
-admin-authored entries:
+out of the core scope and must never be visually confused with confirmed
+entries:
 - Never render a suggestion as an ink stamp (`Stamp.tsx`) or with any host
   pin colour — those are reserved for confirmed hosts/dinners.
 - Suggestions use a muted, "pencilled note" language: dashed borders
