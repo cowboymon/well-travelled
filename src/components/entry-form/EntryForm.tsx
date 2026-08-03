@@ -11,6 +11,7 @@ export function EntryForm({
   hosts,
   entry,
   defaultCountryCode,
+  defaultNotes,
   onClose,
   onSaved,
   onHostCreated,
@@ -18,6 +19,7 @@ export function EntryForm({
   hosts: HostRecord[];
   entry: EntryRecord | null;
   defaultCountryCode: string | null;
+  defaultNotes?: string | null;
   onClose: () => void;
   onSaved: () => void;
   onHostCreated: () => void;
@@ -33,7 +35,7 @@ export function EntryForm({
   const [attendees, setAttendees] = useState<string[]>(
     entry?.attendees ?? []
   );
-  const [notes, setNotes] = useState(entry?.notes ?? "");
+  const [notes, setNotes] = useState(entry?.notes ?? defaultNotes ?? "");
   const [files, setFiles] = useState<File[]>([]);
   const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(
     entry?.photos.map((p) => p.url) ?? []

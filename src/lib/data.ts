@@ -113,6 +113,11 @@ export async function createSuggestion(
   return { ...row, createdAt: row.createdAt as unknown as string };
 }
 
+export async function deleteSuggestion(id: string): Promise<void> {
+  const db = getDb();
+  await db.delete(schema.suggestions).where(eq(schema.suggestions.id, id));
+}
+
 export async function listPeople(): Promise<PersonRecord[]> {
   const db = getDb();
   const rows = await db.select().from(schema.people).orderBy(schema.people.name);

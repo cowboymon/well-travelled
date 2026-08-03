@@ -4,26 +4,35 @@ import { FormEvent, useEffect, useState } from "react";
 import { Stamp } from "@/components/ui/Stamp";
 import { countryName, COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
-import type { CommentRecord, EntryRecord, PersonRecord } from "@/lib/types";
+import type {
+  CommentRecord,
+  EntryRecord,
+  PersonRecord,
+  SuggestionRecord,
+} from "@/lib/types";
 
 export function EntryPanel({
   countryCode,
   entries,
+  suggestions,
   isAdmin,
   onClose,
   onEdit,
   onDelete,
   onAddForCountry,
   onSuggestForCountry,
+  onPromoteSuggestion,
 }: {
   countryCode: string;
   entries: EntryRecord[];
+  suggestions: SuggestionRecord[];
   isAdmin: boolean;
   onClose: () => void;
   onEdit: (entry: EntryRecord) => void;
   onDelete: (entry: EntryRecord) => void;
   onAddForCountry: (countryCode: string) => void;
   onSuggestForCountry: (countryCode: string) => void;
+  onPromoteSuggestion: (suggestion: SuggestionRecord) => void;
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(
@@ -76,6 +85,35 @@ export function EntryPanel({
             >
               Suggest this country
             </button>
+          </div>
+        )}
+
+        {suggestions.length > 0 && (
+          <div className="mb-6 flex flex-col gap-2">
+            <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.2em] text-ink-faded">
+              Proposed, not yet cooked
+            </p>
+            {suggestions.map((s) => (
+              <div
+                key={s.id}
+                className="rounded-sm border border-dashed border-[var(--ink-faded)]/50 p-3"
+              >
+                {s.note && (
+                  <p className="font-body text-xs text-ink-faded">{s.note}</p>
+                )}
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-ink-faded">
+                    {s.suggestedBy ? `— ${s.suggestedBy}` : "— Someone"}
+                  </p>
+                  <button
+                    onClick={() => onPromoteSuggestion(s)}
+                    className="font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-oxblood hover:opacity-70"
+                  >
+                    Promote to entry
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

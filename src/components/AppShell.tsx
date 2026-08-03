@@ -40,6 +40,8 @@ export function AppShell({
   const [showEntryForm, setShowEntryForm] = useState<{
     entry: EntryRecord | null;
     defaultCountryCode: string | null;
+    defaultNotes?: string | null;
+    promoteSuggestionId?: string | null;
   } | null>(null);
   const [showHostManager, setShowHostManager] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -88,6 +90,10 @@ export function AppShell({
 
   const entriesForSelected = selectedCountry
     ? entries.filter((e) => e.countryCode === selectedCountry)
+    : [];
+
+  const suggestionsForSelected = selectedCountry
+    ? suggestions.filter((s) => s.countryCode === selectedCountry)
     : [];
 
   return (
@@ -153,6 +159,7 @@ export function AppShell({
         <EntryPanel
           countryCode={selectedCountry}
           entries={entriesForSelected}
+          suggestions={suggestionsForSelected}
           isAdmin={isAdmin}
           onClose={() => setSelectedCountry(null)}
           onEdit={(entry) =>
@@ -168,6 +175,21 @@ export function AppShell({
           onSuggestForCountry={(code) =>
             setShowSuggestionForm({ defaultCountryCode: code })
           }
+          onPromoteSuggestion={(suggestion) =>
+            setShowEntryForm({
+              entry: null,
+              defaultCountryCode: suggestion.countryCode,
+              defaultNotes: [
+                suggestion.suggestedBy
+                  ? `Suggested by ${suggestion.suggestedBy}.`
+                  : "Suggested by a viewer.",
+                suggestion.note ?? "",
+              ]
+                .filter(Boolean)
+                .join(" "),
+              promoteSuggestionId: suggestion.id,
+            })
+          }
         />
       )}
 
@@ -176,10 +198,18 @@ export function AppShell({
           hosts={hosts}
           entry={showEntryForm.entry}
           defaultCountryCode={showEntryForm.defaultCountryCode}
+          defaultNotes={showEntryForm.defaultNotes}
           onClose={() => setShowEntryForm(null)}
           onSaved={async () => {
+            const promoteId = showEntryForm.promoteSuggestionId;
             setShowEntryForm(null);
             await refreshData();
+            if (promoteId) {
+              await fetch(`/api/suggestions/${promoteId}`, {
+                method: "DELETE",
+              });
+              await refreshSuggestions();
+            }
           }}
           onHostCreated={refreshData}
         />
