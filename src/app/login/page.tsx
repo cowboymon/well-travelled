@@ -2,6 +2,7 @@
 
 import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Stamp } from "@/components/ui/Stamp";
 
 function LoginForm() {
   const router = useRouter();
@@ -47,13 +48,9 @@ function LoginForm() {
             Well Travelled
           </h1>
         </div>
-        <span
-          aria-hidden
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--oxblood)]/70 font-mono-data text-[0.6rem] uppercase tracking-[0.1em] text-[var(--oxblood)]/80"
-          style={{ transform: "rotate(-6deg)" }}
-        >
-          WT
-        </span>
+        <div className="shrink-0" aria-hidden>
+          <Stamp id="well-travelled-wordmark" colour="#7A2E2E" initial="WT" size={44} />
+        </div>
       </div>
 
       <label
