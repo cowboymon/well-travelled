@@ -127,32 +127,61 @@ entries:
   a bordered brass button for the toggle) — never merged into one line, so
   they don't read as the same control.
 
-## Passport stamps (permanent rule)
+## Passport stamps (permanent rule) — EXPLICIT PALETTE EXCEPTION
 `src/components/ui/PassportStamp.tsx` renders a visited *country* as a
 generative visa/customs stamp — a separate system from the host-pin
 `Stamp.tsx` (double-ring circle only, used exclusively for map/entry-panel
 host markers). Do not merge the two components or let one borrow the
 other's colour system.
 
-- **Oxblood ink only.** `PassportStamp` never takes a colour prop and never
-  renders in a host colour — host colours are reserved for the pin system.
-- **Shape vocabulary.** One of five shapes is picked deterministically per
-  entry via `seededPick(id, options)` (`src/lib/palette.ts`): circle,
-  hexagon, octagon, rounded rectangle, horizontal oval.
-- **Rotation.** Each stamp also gets an independent seeded tilt via the
-  existing `seededRotation(id)`, same ±8° pattern as `Stamp.tsx`, so a
-  collection of stamps reads as "landed by hand" rather than machine-
-  aligned or grid-snapped.
+**This component is an intentional, explicit exception to "What every
+screen must share" above.** The user asked for it to look "a bit more out
+there" than the rest of the app, referencing real passport/visa/postal
+stamp reference sheets (saturated single-ink colours per stamp, varied
+shapes, hand-stamped tilt, small decorative flourishes). Every other
+component in this app — map, forms, buttons, suggestions system — stays
+locked to the paper/ink/oxblood/brass system with zero exceptions.
+**A future pass must not "fix" `PassportStamp` back to oxblood-only** —
+that would be reverting a deliberate decision, not a cleanup.
+
+- **Ink palette.** One colour is picked deterministically per entry from
+  `STAMP_INK_PALETTE` (`src/lib/palette.ts`) via `seededPick`: oxblood
+  `#7A2E2E`, ink `#1C1E26`, navy `#2B4C7E`, crimson `#8C2F2F`, forest
+  `#2F5C3F`, purple `#5B3A7A`, teal-ink `#1F5C5C`. Every element of a given
+  stamp (border, text, icon) uses that one picked colour — still strictly
+  single-colour-per-stamp, just not always oxblood. These are desaturated
+  "classic travel ink" tones, not garish stickers — restraint still applies
+  within the wider hue range.
+- **Shape vocabulary.** One of eight shapes is picked deterministically per
+  entry via `seededPick(id, options)`: circle, hexagon, octagon, rounded
+  rectangle, horizontal oval, triangle, diamond, and a scalloped/gear-edge
+  circle (wavy perforated-looking outer edge).
+- **Rotation.** Each stamp gets an independent seeded tilt via
+  `seededRotationRange(id, 17)` — roughly ±17°, wider than `Stamp.tsx`'s
+  ±8° (`seededRotation`) — so a collection of stamps reads as more
+  haphazardly hand-stamped than the neat host pins. `Stamp.tsx` and the
+  collection grid's scatter nudge keep using `seededRotation`'s original
+  ±8° contract unchanged.
 - **Border language.** Reuses `Stamp.tsx`'s double-ring technique (solid
   outer border, ~40%-opacity inner border) and its `feTurbulence`/
   `feDisplacementMap` roughness filter, adapted to whichever shape is
-  picked — the one texture effect on the stamp, nothing layered on top.
-- **Text hierarchy, exactly three tiers:** country name (`font-display`,
-  largest), continent (`font-mono-data` uppercase, smaller), and the entry
-  date formatted as a compact visa date (e.g. `18 NOV 2025`, smallest,
-  set off by a short tick divider). No landmark icons — the app spans
-  ~190 possible countries and can't hand-illustrate each one, so that
-  reference detail is skipped rather than faked.
+  picked — still the one texture effect on the stamp, nothing layered on
+  top (no second grain overlay, no compound double-stamps).
+- **Text and decoration.** Country name (`font-display`, largest — arced
+  along the top of the ring via `textPath` for circle/scallop shapes, a
+  straight centred line for every other shape); continent
+  (`font-mono-data` uppercase); a mandatory entry date formatted as a
+  compact visa date (e.g. `18 NOV 2025`); a seeded `ARRIVAL`/`VISITED`
+  label; short flanking rule-lines beside the label line; a small mirrored
+  corner reference code (2 letters + 2-3 digits, `seededStampCode(id)`,
+  purely decorative, not a real identifier); and one small seeded transit
+  icon (plane, ship, train, or a 5-point star) tucked in a spare corner.
+- **Detail scaling.** A `detail: "full" | "simple"` prop (defaulting to a
+  `size >= 60` threshold) drops the reference-code corners, icon, arced
+  text, and label at small sizes — the login watermark instances render
+  `simple` automatically, keeping country/continent/date legible without
+  crowding a ~70-130px stamp; the collection grid (size 100) renders
+  `full`.
 - **Used in:** a sparse, low-opacity watermark scatter behind the login
   form (`src/components/login/LoginForm.tsx`), and the "stamp collection"
   view (`src/components/ui/StampCollection.tsx`, opened via the Legend's
