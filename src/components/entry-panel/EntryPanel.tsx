@@ -39,6 +39,7 @@ export function EntryPanel({
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EntryRecord | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(
     null
   );
@@ -55,6 +56,15 @@ export function EntryPanel({
   const sorted = [...entries].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const [prevCountryCode, setPrevCountryCode] = useState(countryCode);
+  if (countryCode !== prevCountryCode) {
+    setPrevCountryCode(countryCode);
+    setActiveIndex(0);
+  }
+
+  const clampedIndex = Math.min(activeIndex, Math.max(sorted.length - 1, 0));
+  const activeEntry = sorted[clampedIndex] ?? null;
 
   async function performDelete(entry: EntryRecord) {
     setPendingDelete(null);
@@ -154,112 +164,146 @@ export function EntryPanel({
           + Add another entry
         </button>
 
-        <div className="flex flex-col gap-8">
-          {sorted.map((entry, idx) => (
-            <article
-              key={entry.id}
-              className="border-t border-brass/30 pt-6 first:border-t-0 first:pt-0"
-            >
-              <div className="mb-3 flex items-start justify-between">
+        {activeEntry && (
+          <article
+            key={activeEntry.id}
+            className="border-t border-brass/30 pt-6"
+          >
+            {sorted.length > 1 && (
+              <div className="mb-3 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveIndex(
+                      (clampedIndex - 1 + sorted.length) % sorted.length
+                    )
+                  }
+                  aria-label="Previous entry"
+                  className="rounded-sm border border-brass/50 px-2 py-1 font-mono-data text-xs text-ink hover:bg-black/5"
+                >
+                  &larr;
+                </button>
                 <p className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded">
-                  Entry no. {sorted.length - idx}
+                  Entry {clampedIndex + 1} of {sorted.length}
                 </p>
-                {entry.host && (
-                  <div
-                    style={{
-                      transform: `rotate(${seededRotation(entry.id)}deg)`,
-                    }}
-                  >
-                    <Stamp
-                      id={entry.id}
-                      colour={entry.host.colour}
-                      initial={entry.host.initial}
-                      size={40}
-                    />
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveIndex((clampedIndex + 1) % sorted.length)
+                  }
+                  aria-label="Next entry"
+                  className="rounded-sm border border-brass/50 px-2 py-1 font-mono-data text-xs text-ink hover:bg-black/5"
+                >
+                  &rarr;
+                </button>
               </div>
+            )}
 
-              <table className="w-full border-collapse font-mono-data text-xs">
-                <tbody>
-                  <Row label="Host" value={entry.host?.name ?? "Unknown"} />
-                  {entry.coHost && (
-                    <Row label="Co-host" value={entry.coHost.name} />
-                  )}
-                  <Row
-                    label="Date"
-                    value={new Date(entry.date).toLocaleDateString(undefined, {
+            <div className="mb-3 flex items-start justify-between">
+              <p className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded">
+                Entry no. {sorted.length - clampedIndex}
+              </p>
+              {activeEntry.host && (
+                <div
+                  style={{
+                    transform: `rotate(${seededRotation(activeEntry.id)}deg)`,
+                  }}
+                >
+                  <Stamp
+                    id={activeEntry.id}
+                    colour={activeEntry.host.colour}
+                    initial={activeEntry.host.initial}
+                    size={40}
+                  />
+                </div>
+              )}
+            </div>
+
+            <table className="w-full border-collapse font-mono-data text-xs">
+              <tbody>
+                <Row label="Host" value={activeEntry.host?.name ?? "Unknown"} />
+                {activeEntry.coHost && (
+                  <Row label="Co-host" value={activeEntry.coHost.name} />
+                )}
+                <Row
+                  label="Date"
+                  value={new Date(activeEntry.date).toLocaleDateString(
+                    undefined,
+                    {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
-                    })}
-                  />
-                  <Row label="Dishes" value={entry.dishes.join(", ") || "—"} />
-                  <Row
-                    label="Attendees"
-                    value={entry.attendees.join(", ") || "—"}
-                  />
-                </tbody>
-              </table>
+                    }
+                  )}
+                />
+                <Row
+                  label="Dishes"
+                  value={activeEntry.dishes.join(", ") || "—"}
+                />
+                <Row
+                  label="Attendees"
+                  value={activeEntry.attendees.join(", ") || "—"}
+                />
+              </tbody>
+            </table>
 
-              {entry.photos.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {entry.photos.map((photo, pIdx) => (
-                    <button
-                      type="button"
-                      key={photo.id}
-                      onClick={() =>
-                        setLightbox({
-                          urls: entry.photos.map((p) => p.url),
-                          index: pIdx,
-                        })
-                      }
-                      className="border-4 border-white bg-white shadow-sm"
-                      style={{
-                        transform: `rotate(${
-                          (seededRotation(photo.id + pIdx) / 8) * 2
-                        }deg)`,
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={photo.url}
-                        alt=""
-                        className="h-28 w-28 object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {entry.notes && (
-                <p className="mt-4 font-body text-sm italic text-ink-faded">
-                  {entry.notes}
-                </p>
-              )}
-
-              {isAdmin && (
-                <div className="mt-4 flex gap-3">
+            {activeEntry.photos.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {activeEntry.photos.map((photo, pIdx) => (
                   <button
-                    onClick={() => onEdit(entry)}
-                    className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
+                    type="button"
+                    key={photo.id}
+                    onClick={() =>
+                      setLightbox({
+                        urls: activeEntry.photos.map((p) => p.url),
+                        index: pIdx,
+                      })
+                    }
+                    className="border-4 border-white bg-white shadow-sm"
+                    style={{
+                      transform: `rotate(${
+                        (seededRotation(photo.id + pIdx) / 8) * 2
+                      }deg)`,
+                    }}
                   >
-                    Edit
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photo.url}
+                      alt=""
+                      className="h-28 w-28 object-cover"
+                    />
                   </button>
-                  <button
-                    onClick={() => setPendingDelete(entry)}
-                    disabled={deletingId === entry.id}
-                    className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-oxblood hover:opacity-70 disabled:opacity-40"
-                  >
-                    {deletingId === entry.id ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
-              )}
+                ))}
+              </div>
+            )}
 
-              <CommentsSection entryId={entry.id} />
-            </article>
-          ))}
-        </div>
+            {activeEntry.notes && (
+              <p className="mt-4 font-body text-sm italic text-ink-faded">
+                {activeEntry.notes}
+              </p>
+            )}
+
+            {isAdmin && (
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={() => onEdit(activeEntry)}
+                  className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setPendingDelete(activeEntry)}
+                  disabled={deletingId === activeEntry.id}
+                  className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-oxblood hover:opacity-70 disabled:opacity-40"
+                >
+                  {deletingId === activeEntry.id ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            )}
+
+            <CommentsSection entryId={activeEntry.id} />
+          </article>
+        )}
         </div>
       </div>
 
