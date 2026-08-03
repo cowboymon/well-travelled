@@ -9,6 +9,7 @@ import { EntryForm } from "@/components/entry-form/EntryForm";
 import { HostManager } from "@/components/host-manager/HostManager";
 import { SuggestionForm } from "@/components/suggestions/SuggestionForm";
 import { SuggestionsList } from "@/components/suggestions/SuggestionsList";
+import { StampCollection } from "@/components/ui/StampCollection";
 import { COUNTRY_BY_ALPHA3, countryName } from "@/lib/countries";
 import type { EntryRecord, HostRecord, SuggestionRecord } from "@/lib/types";
 
@@ -32,6 +33,7 @@ export function AppShell({
     defaultCountryCode: string | null;
   } | null>(null);
   const [showSuggestionsList, setShowSuggestionsList] = useState(false);
+  const [showStampCollection, setShowStampCollection] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [mysteryResult, setMysteryResult] = useState<{
     person: string;
@@ -205,6 +207,7 @@ export function AppShell({
             setIsAdmin(false);
           }}
           onUnlockAdmin={() => setShowAdminLogin(true)}
+          onOpenStampCollection={() => setShowStampCollection(true)}
         />
       </div>
 
@@ -281,6 +284,14 @@ export function AppShell({
             setShowSuggestionsList(false);
             promoteSuggestion(suggestion);
           }}
+        />
+      )}
+
+      {showStampCollection && (
+        <StampCollection
+          entries={entries}
+          onClose={() => setShowStampCollection(false)}
+          onSelectCountry={(code) => setSelectedCountry(code)}
         />
       )}
 

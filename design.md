@@ -127,6 +127,38 @@ entries:
   a bordered brass button for the toggle) — never merged into one line, so
   they don't read as the same control.
 
+## Passport stamps (permanent rule)
+`src/components/ui/PassportStamp.tsx` renders a visited *country* as a
+generative visa/customs stamp — a separate system from the host-pin
+`Stamp.tsx` (double-ring circle only, used exclusively for map/entry-panel
+host markers). Do not merge the two components or let one borrow the
+other's colour system.
+
+- **Oxblood ink only.** `PassportStamp` never takes a colour prop and never
+  renders in a host colour — host colours are reserved for the pin system.
+- **Shape vocabulary.** One of five shapes is picked deterministically per
+  entry via `seededPick(id, options)` (`src/lib/palette.ts`): circle,
+  hexagon, octagon, rounded rectangle, horizontal oval.
+- **Rotation.** Each stamp also gets an independent seeded tilt via the
+  existing `seededRotation(id)`, same ±8° pattern as `Stamp.tsx`, so a
+  collection of stamps reads as "landed by hand" rather than machine-
+  aligned or grid-snapped.
+- **Border language.** Reuses `Stamp.tsx`'s double-ring technique (solid
+  outer border, ~40%-opacity inner border) and its `feTurbulence`/
+  `feDisplacementMap` roughness filter, adapted to whichever shape is
+  picked — the one texture effect on the stamp, nothing layered on top.
+- **Text hierarchy, exactly three tiers:** country name (`font-display`,
+  largest), continent (`font-mono-data` uppercase, smaller), and the entry
+  date formatted as a compact visa date (e.g. `18 NOV 2025`, smallest,
+  set off by a short tick divider). No landmark icons — the app spans
+  ~190 possible countries and can't hand-illustrate each one, so that
+  reference detail is skipped rather than faked.
+- **Used in:** a sparse, low-opacity watermark scatter behind the login
+  form (`src/components/login/LoginForm.tsx`), and the "stamp collection"
+  view (`src/components/ui/StampCollection.tsx`, opened via the Legend's
+  "View stamp collection" button) — a loosely scattered grid of every
+  confirmed entry, each stamp clickable through to its `EntryPanel`.
+
 ## Exports
 
 ### tokens.css

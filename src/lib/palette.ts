@@ -21,3 +21,14 @@ export function seededRotation(id: string): number {
   const normalized = (Math.abs(hash) % 1000) / 1000; // 0..1
   return Math.round((normalized * 16 - 8) * 10) / 10; // -8..8, 1 decimal
 }
+
+/** Deterministically picks one item from `options` based on a hash of `id`. */
+export function seededPick<T>(id: string, options: readonly T[]): T {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash << 5) - hash + id.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % options.length;
+  return options[index];
+}

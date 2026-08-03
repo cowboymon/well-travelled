@@ -1,98 +1,40 @@
-"use client";
+import { Suspense } from "react";
+import { listEntries } from "@/lib/data";
+import { LoginForm } from "@/components/login/LoginForm";
 
-import { FormEvent, Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Stamp } from "@/components/ui/Stamp";
+// Entries change over time (new dinners logged) and this page is publicly
+// reachable pre-auth, so render it fresh per request rather than baking a
+// stale entries snapshot in at build time.
+export const dynamic = "force-dynamic";
 
-function LoginForm() {
-  const router = useRouter();
-  const params = useSearchParams();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+// Evergreen placeholders used only when there are zero real entries yet
+// (fresh install) — invented plausible countries/dates, clearly not real
+// data, so the login background isn't empty on day one.
+const PLACEHOLDER_STAMPS = [
+  { id: "placeholder-jpn", countryCode: "JPN", date: "2024-04-12" },
+  { id: "placeholder-ita", countryCode: "ITA", date: "2024-09-03" },
+  { id: "placeholder-per", countryCode: "PER", date: "2025-01-27" },
+  { id: "placeholder-mar", countryCode: "MAR", date: "2025-06-15" },
+  { id: "placeholder-vnm", countryCode: "VNM", date: "2025-08-30" },
+];
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/site", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setError(body.error ?? "Incorrect password.");
-        return;
-      }
-      const from = params.get("from") || "/";
-      router.replace(from);
-      router.refresh();
-    } finally {
-      setLoading(false);
-    }
-  }
+export default async function LoginPage() {
+  // The login page itself is exempt from the site-password gate (see
+  // `PUBLIC_PATHS` in middleware.ts), so this direct server-side call
+  // (bypassing any authenticated API route) only ever exposes country code
+  // + date for the watermark background — no host names, notes, photos, or
+  // attendees. Kept to this minimal a slice deliberately, since the login
+  // screen is the one place an unauthenticated visitor renders.
+  const entries = await listEntries();
+  const stamps =
+    entries.length > 0
+      ? entries.map((e) => ({ id: e.id, countryCode: e.countryCode, date: e.date }))
+      : PLACEHOLDER_STAMPS;
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="corner-ticks w-full max-w-sm rounded-sm border border-[var(--brass)]/40 bg-[var(--paper)] p-8 shadow-paper"
-    >
-      <div className="mb-8 flex items-start justify-between border-b border-[var(--brass)]/40 pb-4">
-        <div>
-          <p className="font-mono-data text-[0.65rem] uppercase tracking-[0.2em] text-[var(--ink-faded)]">
-            Entry Required
-          </p>
-          <h1 className="mt-1 font-display text-2xl uppercase tracking-[0.2em] text-[var(--ink)]">
-            Well Travelled
-          </h1>
-        </div>
-        <div className="shrink-0" aria-hidden>
-          <Stamp id="well-travelled-wordmark" colour="#7A2E2E" initial="WT" size={44} />
-        </div>
-      </div>
-
-      <label
-        htmlFor="site-password"
-        className="mb-2 block font-mono-data text-xs uppercase tracking-[0.14em] text-[var(--ink-faded)]"
-      >
-        Password
-      </label>
-      <input
-        id="site-password"
-        type="password"
-        autoFocus
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="••••••••"
-        className="mb-4 w-full rounded-sm border border-[var(--brass)]/50 bg-white/40 px-4 py-3 font-mono-data text-sm tracking-wide text-[var(--ink)] outline-none focus:border-[var(--oxblood)]"
-      />
-      {error && (
-        <p className="mb-4 font-mono-data text-xs text-[var(--oxblood)]">
-          {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-sm bg-[var(--oxblood)] px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-[var(--paper)] transition-opacity hover:opacity-90 disabled:opacity-50"
-      >
-        {loading ? "Checking..." : "Unlock"}
-      </button>
-
-      <p className="mt-6 border-t border-[var(--brass)]/30 pt-4 text-center font-mono-data text-[0.65rem] uppercase tracking-[0.14em] text-[var(--ink-faded)]">
-        A record of experiences at On Margaret Street
-      </p>
-    </form>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[var(--paper)] px-4">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[var(--paper)] px-4">
       <Suspense fallback={null}>
-        <LoginForm />
+        <LoginForm stamps={stamps} />
       </Suspense>
     </div>
   );

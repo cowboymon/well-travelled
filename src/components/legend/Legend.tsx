@@ -16,6 +16,7 @@ export function Legend({
   onAddEntry,
   onLogoutAdmin,
   onUnlockAdmin,
+  onOpenStampCollection,
 }: {
   hosts: HostRecord[];
   visitedCount: number;
@@ -28,6 +29,7 @@ export function Legend({
   onAddEntry: () => void;
   onLogoutAdmin: () => void;
   onUnlockAdmin: () => void;
+  onOpenStampCollection: () => void;
 }) {
   return (
     <aside className="flex h-full w-full flex-col gap-5 overflow-y-auto border-l border-brass/30 bg-paper/95 p-6 backdrop-blur-sm">
@@ -86,6 +88,12 @@ export function Legend({
           className="rounded-sm bg-oxblood px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper transition-opacity hover:opacity-90"
         >
           + Add entry
+        </button>
+        <button
+          onClick={onOpenStampCollection}
+          className="rounded-sm border border-brass/50 px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:bg-black/5"
+        >
+          View stamp collection
         </button>
         {isAdmin ? (
           <>
