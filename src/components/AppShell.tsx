@@ -43,7 +43,6 @@ export function AppShell({
   } | null>(null);
   const [showHostManager, setShowHostManager] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [showMobileAdminMenu, setShowMobileAdminMenu] = useState(false);
 
   const hostById = useMemo(
     () => new Map(hosts.map((h) => [h.id, h])),
@@ -127,16 +126,6 @@ export function AppShell({
           )}
         </div>
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
-          <button
-            onClick={() =>
-              isAdmin ? setShowMobileAdminMenu(true) : setShowAdminLogin(true)
-            }
-            className="rounded-sm border border-brass/50 bg-paper/90 px-3 py-1.5 font-mono-data text-[10px] uppercase tracking-[0.14em] text-ink-faded shadow-paper-sm hover:text-ink"
-          >
-            Admin
-          </button>
-        </div>
       </div>
 
       <div className="hidden h-full w-[320px] shrink-0 md:block">
@@ -159,52 +148,6 @@ export function AppShell({
           onUnlockAdmin={() => setShowAdminLogin(true)}
         />
       </div>
-
-      {showMobileAdminMenu && (
-        <div
-          className="fixed inset-0 z-30 flex items-end bg-black/30 md:hidden"
-          onClick={() => setShowMobileAdminMenu(false)}
-        >
-          <div
-            className="w-full rounded-t-sm border-t border-brass/40 bg-paper p-6 shadow-paper animate-fade-lift"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="mb-4 font-mono-data text-[11px] uppercase tracking-[0.2em] text-ink-faded">
-              Admin
-            </p>
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  setShowMobileAdminMenu(false);
-                  setShowEntryForm({ entry: null, defaultCountryCode: null });
-                }}
-                className="rounded-sm bg-oxblood px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper transition-opacity hover:opacity-90"
-              >
-                + Add entry
-              </button>
-              <button
-                onClick={() => {
-                  setShowMobileAdminMenu(false);
-                  setShowHostManager(true);
-                }}
-                className="rounded-sm border border-brass/50 px-4 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:bg-black/5"
-              >
-                Manage hosts
-              </button>
-              <button
-                onClick={async () => {
-                  await fetch("/api/auth/admin", { method: "DELETE" });
-                  setIsAdmin(false);
-                  setShowMobileAdminMenu(false);
-                }}
-                className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded hover:text-ink"
-              >
-                Exit admin mode
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {selectedCountry && (
         <EntryPanel
