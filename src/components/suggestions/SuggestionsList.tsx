@@ -26,8 +26,8 @@ export function SuggestionsList({
   }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="flex max-h-[80vh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-sm border border-brass/40 bg-paper p-6 shadow-paper animate-fade-lift">
-        <div className="flex items-center justify-between border-b border-dashed border-[var(--ink-faded)]/40 pb-3">
+      <div className="flex max-h-[80vh] w-full max-w-md flex-col rounded-sm border border-brass/40 bg-paper shadow-paper animate-fade-lift">
+        <div className="flex shrink-0 items-center justify-between border-b border-dashed border-[var(--ink-faded)]/40 bg-paper px-6 pb-3 pt-6">
           <div>
             <p className="font-mono-data text-[0.6rem] uppercase tracking-[0.2em] text-ink-faded">
               Proposed, not yet cooked
@@ -43,7 +43,7 @@ export function SuggestionsList({
           </button>
         </div>
 
-        <ul className="flex flex-col gap-3">
+        <ul className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 pb-6 pt-4">
           {displayed.map((s) => (
             <li
               key={s.id}
