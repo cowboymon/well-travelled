@@ -66,8 +66,8 @@ export function EntryPanel({
 
   return (
     <div className="pointer-events-none fixed inset-0 z-40 flex justify-end bg-black/20 animate-fade-lift md:bg-transparent">
-      <div className="pointer-events-auto h-full w-full overflow-y-auto border-l border-brass/30 bg-paper p-6 shadow-paper md:w-[420px] md:p-8">
-        <div className="mb-4 flex items-start justify-between">
+      <div className="pointer-events-auto flex h-full w-full flex-col overflow-y-auto border-l border-brass/30 bg-paper shadow-paper md:w-[420px]">
+        <div className="sticky top-0 z-10 flex shrink-0 items-start justify-between border-b border-dashed border-brass/30 bg-paper px-6 pb-4 pt-6 md:px-8 md:pt-8">
           <div>
             <p className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded">
               {ref?.continent ?? "Unknown region"} &middot; {countryCode}
@@ -85,6 +85,7 @@ export function EntryPanel({
           </button>
         </div>
 
+        <div className="px-6 pb-6 pt-4 md:px-8 md:pb-8">
         {sorted.length === 0 && (
           <div className="mb-6 rounded-sm border border-dashed border-brass/50 p-4">
             <p className="mb-3 font-mono-data text-xs text-ink-faded">
@@ -148,9 +149,7 @@ export function EntryPanel({
           onClick={() => onAddForCountry(countryCode)}
           className="mb-6 w-full rounded-sm border border-brass/50 px-4 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-ink hover:bg-black/5"
         >
-          {sorted.length === 0
-            ? "+ Add an entry for this country"
-            : "+ Add another entry for this country"}
+          + Add another entry
         </button>
 
         <div className="flex flex-col gap-8">
@@ -258,6 +257,7 @@ export function EntryPanel({
               <CommentsSection entryId={entry.id} />
             </article>
           ))}
+        </div>
         </div>
       </div>
 

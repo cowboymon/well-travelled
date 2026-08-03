@@ -95,6 +95,13 @@ export function AppShell({
 
   async function drawMystery() {
     if (drawing) return;
+    if (
+      !confirm(
+        "Draw a mystery country? This randomly assigns someone to an unclaimed suggestion (or a new random country if none are unclaimed) — are you sure?"
+      )
+    ) {
+      return;
+    }
     setDrawing(true);
     try {
       const res = await fetch("/api/suggestions/mystery", { method: "POST" });
