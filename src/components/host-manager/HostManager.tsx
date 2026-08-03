@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Stamp } from "@/components/ui/Stamp";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HOST_PALETTE } from "@/lib/palette";
 import type { HostRecord } from "@/lib/types";
 
@@ -20,6 +21,7 @@ export function HostManager({
   const [colour, setColour] = useState<string>(HOST_PALETTE[0].hex);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<HostRecord | null>(null);
 
   function startEdit(host: HostRecord) {
     setEditingId(host.id);
@@ -66,14 +68,8 @@ export function HostManager({
     }
   }
 
-  async function remove(host: HostRecord) {
-    const message =
-      host.entryCount > 0
-        ? `${host.name} has ${host.entryCount} entr${
-            host.entryCount === 1 ? "y" : "ies"
-          }. Deleting them will remove those entries too. Continue?`
-        : `Delete ${host.name}?`;
-    if (!confirm(message)) return;
+  async function performRemove(host: HostRecord) {
+    setPendingDelete(null);
     const res = await fetch(`/api/hosts/${host.id}`, { method: "DELETE" });
     if (res.ok) onChanged();
   }
@@ -111,7 +107,7 @@ export function HostManager({
                 Edit
               </button>
               <button
-                onClick={() => remove(host)}
+                onClick={() => setPendingDelete(host)}
                 className="font-mono-data text-[11px] uppercase tracking-[0.1em] text-oxblood hover:opacity-70"
               >
                 Delete
@@ -189,6 +185,21 @@ export function HostManager({
           outline: none;
         }
       `}</style>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete host"
+        message={
+          pendingDelete && pendingDelete.entryCount > 0
+            ? `${pendingDelete.name} has ${pendingDelete.entryCount} entr${
+                pendingDelete.entryCount === 1 ? "y" : "ies"
+              }. Deleting them will remove those entries too. Continue?`
+            : `Delete ${pendingDelete?.name ?? "this host"}?`
+        }
+        confirmLabel="Delete"
+        onConfirm={() => pendingDelete && performRemove(pendingDelete)}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

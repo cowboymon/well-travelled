@@ -10,6 +10,7 @@ import { HostManager } from "@/components/host-manager/HostManager";
 import { SuggestionForm } from "@/components/suggestions/SuggestionForm";
 import { SuggestionsList } from "@/components/suggestions/SuggestionsList";
 import { StampCollection } from "@/components/ui/StampCollection";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { COUNTRY_BY_ALPHA3, countryName } from "@/lib/countries";
 import type { EntryRecord, HostRecord, SuggestionRecord } from "@/lib/types";
 
@@ -34,6 +35,7 @@ export function AppShell({
   } | null>(null);
   const [showSuggestionsList, setShowSuggestionsList] = useState(false);
   const [showStampCollection, setShowStampCollection] = useState(false);
+  const [showMysteryConfirm, setShowMysteryConfirm] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [mysteryResult, setMysteryResult] = useState<{
     person: string;
@@ -97,13 +99,11 @@ export function AppShell({
 
   async function drawMystery() {
     if (drawing) return;
-    if (
-      !confirm(
-        "Draw a mystery country? This randomly assigns someone to an unclaimed suggestion (or a new random country if none are unclaimed) — are you sure?"
-      )
-    ) {
-      return;
-    }
+    setShowMysteryConfirm(true);
+  }
+
+  async function confirmDrawMystery() {
+    setShowMysteryConfirm(false);
     setDrawing(true);
     try {
       const res = await fetch("/api/suggestions/mystery", { method: "POST" });
@@ -294,6 +294,15 @@ export function AppShell({
           onSelectCountry={(code) => setSelectedCountry(code)}
         />
       )}
+
+      <ConfirmDialog
+        open={showMysteryConfirm}
+        title="Mystery draw"
+        message="This randomly assigns someone to an unclaimed suggestion, or a new random country if none are unclaimed. Draw a mystery country?"
+        confirmLabel="Draw"
+        onConfirm={confirmDrawMystery}
+        onCancel={() => setShowMysteryConfirm(false)}
+      />
 
       {mysteryResult && (
         <div

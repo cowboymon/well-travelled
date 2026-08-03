@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Stamp } from "@/components/ui/Stamp";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { InterestToggle } from "@/components/suggestions/InterestToggle";
 import { countryName, COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
@@ -37,6 +38,7 @@ export function EntryPanel({
   onPromoteSuggestion: (suggestion: SuggestionRecord) => void;
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<EntryRecord | null>(null);
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(
     null
   );
@@ -54,8 +56,8 @@ export function EntryPanel({
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  async function confirmDelete(entry: EntryRecord) {
-    if (!confirm(`Delete this entry for ${countryName(countryCode)}?`)) return;
+  async function performDelete(entry: EntryRecord) {
+    setPendingDelete(null);
     setDeletingId(entry.id);
     try {
       await onDelete(entry);
@@ -245,7 +247,7 @@ export function EntryPanel({
                     Edit
                   </button>
                   <button
-                    onClick={() => confirmDelete(entry)}
+                    onClick={() => setPendingDelete(entry)}
                     disabled={deletingId === entry.id}
                     className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-oxblood hover:opacity-70 disabled:opacity-40"
                   >
@@ -271,6 +273,15 @@ export function EntryPanel({
           }
         />
       )}
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete entry"
+        message={`Delete this entry for ${countryName(countryCode)}?`}
+        confirmLabel="Delete"
+        onConfirm={() => pendingDelete && performDelete(pendingDelete)}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }
