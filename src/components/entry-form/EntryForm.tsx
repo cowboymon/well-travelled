@@ -1,10 +1,9 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { COUNTRIES } from "@/lib/countries";
 import { HOST_PALETTE } from "@/lib/palette";
-import { ATTENDEES } from "@/lib/attendees";
-import type { EntryRecord, HostRecord } from "@/lib/types";
+import type { EntryRecord, HostRecord, PersonRecord } from "@/lib/types";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -41,10 +40,27 @@ export function EntryForm({
   );
   const [showNewHost, setShowNewHost] = useState(false);
   const [newHostName, setNewHostName] = useState("");
+  const [newHostNameQuery, setNewHostNameQuery] = useState("");
   const [newHostInitial, setNewHostInitial] = useState("");
   const [newHostColour, setNewHostColour] = useState<string>(HOST_PALETTE[0].hex);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [people, setPeople] = useState<PersonRecord[]>([]);
+
+  useEffect(() => {
+    fetch("/api/people")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setPeople)
+      .catch(() => {});
+  }, []);
+
+  const filteredPeople = useMemo(() => {
+    const q = newHostNameQuery.trim().toLowerCase();
+    if (!q) return people.slice(0, 8);
+    return people
+      .filter((p) => p.name.toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [people, newHostNameQuery]);
 
   const filteredCountries = useMemo(() => {
     const q = countryQuery.trim().toLowerCase();
@@ -62,12 +78,13 @@ export function EntryForm({
   const colourChoices = availableColours.length ? availableColours : HOST_PALETTE;
 
   async function createHost() {
-    if (!newHostName.trim() || !newHostInitial.trim()) return;
+    const name = (newHostName || newHostNameQuery).trim();
+    if (!name || !newHostInitial.trim()) return;
     const res = await fetch("/api/hosts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: newHostName.trim(),
+        name,
         initial: newHostInitial.trim().toUpperCase(),
         colour: newHostColour,
       }),
@@ -77,6 +94,7 @@ export function EntryForm({
       setHostId(host.id);
       setShowNewHost(false);
       setNewHostName("");
+      setNewHostNameQuery("");
       setNewHostInitial("");
       onHostCreated();
     } else {
@@ -234,12 +252,41 @@ export function EntryForm({
             </button>
           ) : (
             <div className="mt-2 flex flex-col gap-2 rounded-sm border border-brass/30 p-3">
-              <input
-                value={newHostName}
-                onChange={(e) => setNewHostName(e.target.value)}
-                placeholder="Host name"
-                className="input"
-              />
+              <div>
+                <input
+                  value={newHostName || newHostNameQuery}
+                  onChange={(e) => {
+                    setNewHostNameQuery(e.target.value);
+                    setNewHostName("");
+                  }}
+                  placeholder="Search or type a new name..."
+                  className="input"
+                />
+                {!newHostName && newHostNameQuery && (
+                  <ul className="mt-1 max-h-40 overflow-y-auto rounded-sm border border-brass/30 bg-white/60">
+                    {filteredPeople.map((p) => (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewHostName(p.name);
+                            setNewHostNameQuery("");
+                          }}
+                          className="w-full px-3 py-2 text-left font-body text-sm hover:bg-black/5"
+                        >
+                          {p.name}
+                        </button>
+                      </li>
+                    ))}
+                    {filteredPeople.length === 0 && (
+                      <li className="px-3 py-2 font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded">
+                        No match — this will add &ldquo;{newHostNameQuery}&rdquo;
+                        as a new person.
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </div>
               <input
                 value={newHostInitial}
                 onChange={(e) => setNewHostInitial(e.target.value.slice(0, 3))}
@@ -310,12 +357,12 @@ export function EntryForm({
 
         <Field label="Attendees">
           <div className="flex flex-wrap gap-2">
-            {ATTENDEES.map((name) => {
+            {people.map(({ id, name }) => {
               const active = attendees.includes(name);
               return (
                 <button
                   type="button"
-                  key={name}
+                  key={id}
                   onClick={() =>
                     setAttendees((prev) =>
                       prev.includes(name)

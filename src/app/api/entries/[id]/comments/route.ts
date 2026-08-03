@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isSiteUnlocked } from "@/lib/session";
-import { createComment, listCommentsForEntry } from "@/lib/data";
+import { createComment, findOrCreatePerson, listCommentsForEntry } from "@/lib/data";
 
 const commentSchema = z.object({
   authorName: z.string().trim().min(1).max(80),
@@ -33,6 +33,7 @@ export async function POST(
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.message }, { status: 400 });
   }
+  await findOrCreatePerson(parsed.data.authorName);
   const row = await createComment({
     entryId: id,
     authorName: parsed.data.authorName,

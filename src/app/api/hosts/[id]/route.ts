@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { getDb, schema } from "@/db";
 import { requireAdmin } from "@/lib/session";
 import { HOST_PALETTE } from "@/lib/palette";
+import { findOrCreatePerson } from "@/lib/data";
 
 const updateSchema = z.object({
   name: z.string().trim().min(1).max(80).optional(),
@@ -24,10 +25,15 @@ export async function PATCH(
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.message }, { status: 400 });
   }
+  const updates: typeof parsed.data & { personId?: string } = { ...parsed.data };
+  if (parsed.data.name) {
+    const person = await findOrCreatePerson(parsed.data.name);
+    updates.personId = person.id;
+  }
   const db = getDb();
   const [host] = await db
     .update(schema.hosts)
-    .set(parsed.data)
+    .set(updates)
     .where(eq(schema.hosts.id, id))
     .returning();
   if (!host) {

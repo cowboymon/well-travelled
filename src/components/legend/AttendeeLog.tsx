@@ -1,15 +1,25 @@
 "use client";
 
-import { ATTENDEES } from "@/lib/attendees";
+import { useEffect, useState } from "react";
+import type { PersonRecord } from "@/lib/types";
 
 export function AttendeeLog({ counts }: { counts: Record<string, number> }) {
+  const [people, setPeople] = useState<PersonRecord[]>([]);
+
+  useEffect(() => {
+    fetch("/api/people")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setPeople)
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="border-t border-brass/30 pt-4">
       <p className="mb-2 font-mono-data text-[11px] uppercase tracking-[0.14em] text-ink-faded">
         Attendees
       </p>
       <ul className="flex flex-col gap-1">
-        {ATTENDEES.map((name) => (
+        {people.map(({ name }) => (
           <li
             key={name}
             className="flex items-center gap-3 rounded-sm px-2 py-2"

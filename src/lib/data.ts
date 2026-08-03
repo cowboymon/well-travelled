@@ -2,6 +2,12 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { NewSuggestion, NewComment } from "@/db/schema";
 import { getDb, schema } from "@/db";
 
+export interface PersonRecord {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface HostWithCount {
   id: string;
   name: string;
@@ -104,6 +110,46 @@ export async function createSuggestion(
 ): Promise<SuggestionWithMeta> {
   const db = getDb();
   const [row] = await db.insert(schema.suggestions).values(values).returning();
+  return { ...row, createdAt: row.createdAt as unknown as string };
+}
+
+export async function listPeople(): Promise<PersonRecord[]> {
+  const db = getDb();
+  const rows = await db.select().from(schema.people).orderBy(schema.people.name);
+  return rows.map((r) => ({ ...r, createdAt: r.createdAt as unknown as string }));
+}
+
+/**
+ * Case-insensitive, trimmed lookup-or-create by name. Safe to call
+ * repeatedly with the same name — the unique constraint plus lookup-first
+ * logic makes it a no-op for existing people.
+ */
+export async function findOrCreatePerson(name: string): Promise<PersonRecord> {
+  const db = getDb();
+  const trimmed = name.trim();
+  const [existing] = await db
+    .select()
+    .from(schema.people)
+    .where(sql`lower(${schema.people.name}) = lower(${trimmed})`)
+    .limit(1);
+  if (existing) {
+    return { ...existing, createdAt: existing.createdAt as unknown as string };
+  }
+  const [created] = await db
+    .insert(schema.people)
+    .values({ name: trimmed })
+    .onConflictDoNothing({ target: schema.people.name })
+    .returning();
+  if (created) {
+    return { ...created, createdAt: created.createdAt as unknown as string };
+  }
+  // Race: another request inserted the same name between our lookup and
+  // insert. Re-fetch to return the winning row.
+  const [row] = await db
+    .select()
+    .from(schema.people)
+    .where(sql`lower(${schema.people.name}) = lower(${trimmed})`)
+    .limit(1);
   return { ...row, createdAt: row.createdAt as unknown as string };
 }
 

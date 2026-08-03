@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db";
 import { requireAdmin } from "@/lib/session";
 import { HOST_PALETTE } from "@/lib/palette";
+import { findOrCreatePerson } from "@/lib/data";
 
 const hostSchema = z.object({
   name: z.string().trim().min(1).max(80),
@@ -38,7 +39,11 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.message }, { status: 400 });
   }
+  const person = await findOrCreatePerson(parsed.data.name);
   const db = getDb();
-  const [host] = await db.insert(schema.hosts).values(parsed.data).returning();
+  const [host] = await db
+    .insert(schema.hosts)
+    .values({ ...parsed.data, personId: person.id })
+    .returning();
   return NextResponse.json(host, { status: 201 });
 }

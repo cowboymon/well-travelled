@@ -6,11 +6,22 @@ import {
   date,
 } from "drizzle-orm/pg-core";
 
+export const people = pgTable("people", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const hosts = pgTable("hosts", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   colour: text("colour").notNull(),
   initial: text("initial").notNull(),
+  personId: uuid("person_id").references(() => people.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -67,6 +78,8 @@ export const comments = pgTable("comments", {
     .defaultNow(),
 });
 
+export type Person = typeof people.$inferSelect;
+export type NewPerson = typeof people.$inferInsert;
 export type Host = typeof hosts.$inferSelect;
 export type NewHost = typeof hosts.$inferInsert;
 export type Entry = typeof entries.$inferSelect;

@@ -1,11 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Stamp } from "@/components/ui/Stamp";
 import { countryName, COUNTRY_BY_ALPHA3 } from "@/lib/countries";
 import { seededRotation } from "@/lib/palette";
-import { ATTENDEES } from "@/lib/attendees";
-import type { CommentRecord, EntryRecord } from "@/lib/types";
+import type { CommentRecord, EntryRecord, PersonRecord } from "@/lib/types";
 
 export function EntryPanel({
   countryCode,
@@ -25,6 +24,9 @@ export function EntryPanel({
   onAddForCountry: (countryCode: string) => void;
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(
+    null
+  );
   const ref = COUNTRY_BY_ALPHA3.get(countryCode);
   const sorted = [...entries].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -121,8 +123,15 @@ export function EntryPanel({
               {entry.photos.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-3">
                   {entry.photos.map((photo, pIdx) => (
-                    <div
+                    <button
+                      type="button"
                       key={photo.id}
+                      onClick={() =>
+                        setLightbox({
+                          urls: entry.photos.map((p) => p.url),
+                          index: pIdx,
+                        })
+                      }
                       className="border-4 border-white bg-white shadow-sm"
                       style={{
                         transform: `rotate(${
@@ -136,7 +145,7 @@ export function EntryPanel({
                         alt=""
                         className="h-28 w-28 object-cover"
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -170,6 +179,95 @@ export function EntryPanel({
           ))}
         </div>
       </div>
+
+      {lightbox && (
+        <Lightbox
+          urls={lightbox.urls}
+          index={lightbox.index}
+          onClose={() => setLightbox(null)}
+          onIndexChange={(index) =>
+            setLightbox((prev) => (prev ? { ...prev, index } : prev))
+          }
+        />
+      )}
+    </div>
+  );
+}
+
+function Lightbox({
+  urls,
+  index,
+  onClose,
+  onIndexChange,
+}: {
+  urls: string[];
+  index: number;
+  onClose: () => void;
+  onIndexChange: (index: number) => void;
+}) {
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight" && urls.length > 1) {
+        onIndexChange((index + 1) % urls.length);
+      }
+      if (e.key === "ArrowLeft" && urls.length > 1) {
+        onIndexChange((index - 1 + urls.length) % urls.length);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [index, urls.length, onClose, onIndexChange]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 animate-fade-lift"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute right-4 top-4 rounded-full p-2 font-mono-data text-2xl text-paper hover:opacity-70"
+      >
+        &times;
+      </button>
+
+      {urls.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onIndexChange((index - 1 + urls.length) % urls.length);
+          }}
+          aria-label="Previous photo"
+          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-sm border border-paper/40 px-3 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-paper hover:bg-white/10"
+        >
+          &larr;
+        </button>
+      )}
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={urls[index]}
+        alt=""
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[85vh] max-w-[90vw] object-contain shadow-paper"
+      />
+
+      {urls.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onIndexChange((index + 1) % urls.length);
+          }}
+          aria-label="Next photo"
+          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-sm border border-paper/40 px-3 py-2 font-mono-data text-xs uppercase tracking-[0.14em] text-paper hover:bg-white/10"
+        >
+          &rarr;
+        </button>
+      )}
     </div>
   );
 }
@@ -180,12 +278,24 @@ function CommentsSection({ entryId }: { entryId: string }) {
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState<CommentRecord[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [attendee, setAttendee] = useState<string>(ATTENDEES[0]);
+  const [people, setPeople] = useState<PersonRecord[]>([]);
+  const [attendee, setAttendee] = useState<string>("");
   const [useOther, setUseOther] = useState(false);
   const [otherName, setOtherName] = useState("");
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showForm || people.length > 0) return;
+    fetch("/api/people")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((rows: PersonRecord[]) => {
+        setPeople(rows);
+        if (rows.length > 0) setAttendee((prev) => prev || rows[0].name);
+      })
+      .catch(() => {});
+  }, [showForm, people.length]);
 
   async function loadComments() {
     setLoading(true);
@@ -304,10 +414,10 @@ function CommentsSection({ entryId }: { entryId: string }) {
                   Who&apos;s this?
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {ATTENDEES.map((name) => (
+                  {people.map(({ id, name }) => (
                     <button
                       type="button"
-                      key={name}
+                      key={id}
                       onClick={() => {
                         setAttendee(name);
                         setUseOther(false);

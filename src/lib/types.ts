@@ -35,6 +35,12 @@ export interface SuggestionRecord {
   createdAt: string;
 }
 
+export interface PersonRecord {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface CommentRecord {
   id: string;
   entryId: string;
