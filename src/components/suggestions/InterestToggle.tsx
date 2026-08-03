@@ -86,9 +86,9 @@ export function InterestToggle({
           type="button"
           onClick={onMainClick}
           disabled={saving}
-          className="rounded-sm border border-[var(--brass)]/60 px-2 py-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-[var(--brass)] hover:bg-black/5 hover:text-ink disabled:opacity-50"
+          className="whitespace-nowrap rounded-sm border border-[var(--brass)]/60 px-2 py-1 font-mono-data text-[0.6rem] uppercase tracking-[0.14em] text-[var(--brass)] hover:bg-black/5 hover:text-ink disabled:opacity-50"
         >
-          {isInterested ? "Not interested anymore" : "I'm interested in hosting"}
+          {isInterested ? "Not interested" : "I'm interested"}
         </button>
         {whoAmI && (
           <button
