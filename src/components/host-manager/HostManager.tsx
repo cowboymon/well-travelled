@@ -80,7 +80,7 @@ export function HostManager({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-sm border border-brass/40 bg-paper p-6 shadow-xl animate-fade-lift">
+      <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-sm border border-brass/40 bg-paper p-6 shadow-paper animate-fade-lift">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl text-ink">Hosts</h2>
           <button

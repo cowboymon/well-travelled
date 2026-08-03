@@ -79,7 +79,7 @@ export function AppShell({
         />
         <button
           onClick={() => setShowLegendSheet(true)}
-          className="absolute bottom-4 right-4 rounded-full bg-oxblood px-5 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper shadow-lg md:hidden"
+          className="absolute bottom-4 right-4 rounded-full bg-oxblood px-5 py-3 font-mono-data text-xs uppercase tracking-[0.14em] text-paper shadow-paper-sm md:hidden"
         >
           Legend
         </button>
@@ -230,7 +230,7 @@ function AdminLoginModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-xs rounded-sm border border-brass/40 bg-paper p-6 shadow-xl animate-fade-lift">
+      <div className="w-full max-w-xs rounded-sm border border-brass/40 bg-paper p-6 shadow-paper animate-fade-lift">
         <h2 className="mb-4 font-display text-xl text-ink">Admin password</h2>
         <input
           type="password"

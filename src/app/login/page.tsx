@@ -36,20 +36,39 @@ function LoginForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-sm rounded-sm border border-[var(--brass)]/40 bg-[var(--paper)] p-8 shadow-sm"
+      className="corner-ticks w-full max-w-sm rounded-sm border border-[var(--brass)]/40 bg-[var(--paper)] p-8 shadow-paper"
     >
-      <p className="mb-1 font-mono-data text-xs uppercase tracking-[0.14em] text-[var(--ink-faded)]">
-        Well Travelled
-      </p>
-      <h1 className="mb-6 font-display text-3xl text-[var(--ink)]">
-        Enter password
-      </h1>
+      <div className="mb-8 flex items-start justify-between border-b border-[var(--brass)]/40 pb-4">
+        <div>
+          <p className="font-mono-data text-[0.65rem] uppercase tracking-[0.2em] text-[var(--ink-faded)]">
+            Entry Required
+          </p>
+          <h1 className="mt-1 font-display text-2xl uppercase tracking-[0.2em] text-[var(--ink)]">
+            Well Travelled
+          </h1>
+        </div>
+        <span
+          aria-hidden
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--oxblood)]/70 font-mono-data text-[0.6rem] uppercase tracking-[0.1em] text-[var(--oxblood)]/80"
+          style={{ transform: "rotate(-6deg)" }}
+        >
+          WT
+        </span>
+      </div>
+
+      <label
+        htmlFor="site-password"
+        className="mb-2 block font-mono-data text-xs uppercase tracking-[0.14em] text-[var(--ink-faded)]"
+      >
+        Password
+      </label>
       <input
+        id="site-password"
         type="password"
         autoFocus
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Site password"
+        placeholder="••••••••"
         className="mb-4 w-full rounded-sm border border-[var(--brass)]/50 bg-white/40 px-4 py-3 font-mono-data text-sm tracking-wide text-[var(--ink)] outline-none focus:border-[var(--oxblood)]"
       />
       {error && (
@@ -64,6 +83,10 @@ function LoginForm() {
       >
         {loading ? "Checking..." : "Unlock"}
       </button>
+
+      <p className="mt-6 border-t border-[var(--brass)]/30 pt-4 text-center font-mono-data text-[0.65rem] uppercase tracking-[0.14em] text-[var(--ink-faded)]">
+        A record of dinners taken abroad
+      </p>
     </form>
   );
 }
